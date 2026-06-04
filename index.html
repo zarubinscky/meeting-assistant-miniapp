@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Meeting Assistant</title>
+</head>
+<body>
+
+<h1>Meeting Assistant</h1>
+
+<p>Загрузка аудио на обработку</p>
+
+<input type="file" id="fileInput">
+
+<br><br>
+
+<button onclick="sendFile()">
+  Отправить
+</button>
+
+<p id="status"></p>
+
+<script>
+
+async function sendFile() {
+
+  const file = document.getElementById('fileInput').files[0];
+
+  if (!file) {
+    alert('Выберите файл');
+    return;
+  }
+
+  document.getElementById('status').innerText =
+    'Загрузка файла...';
+
+  const fileName =
+    Date.now() + '-' + file.name;
+
+  const SUPABASE_URL =
+    'https://vaddfiksldaebnzaccks.supabase.co';
+
+  const SUPABASE_KEY =
+    'ВСТАВИМ_ПОТОМ';
+
+  const uploadResponse = await fetch(
+    `${SUPABASE_URL}/storage/v1/object/meetings/${fileName}`,
+    {
+      method: 'POST',
+      headers: {
+        apikey: SUPABASE_KEY,
+        Authorization: `Bearer ${SUPABASE_KEY}`
+      },
+      body: file
+    }
+  );
+
+  if (!uploadResponse.ok) {
+    document.getElementById('status').innerText =
+      'Ошибка загрузки';
+    return;
+  }
+
+  const fileUrl =
+    `${SUPABASE_URL}/storage/v1/object/public/meetings/${fileName}`;
+
+  document.getElementById('status').innerText =
+    'Файл загружен';
+
+  console.log(fileUrl);
+}
+
+</script>
+
+</body>
+</html>
