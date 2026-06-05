@@ -39,7 +39,7 @@
     async function sendFile() {
       try {
         const file = document.getElementById("fileInput").files[0];
-
+        let processedFile = file;
         if (!file) {
           alert("Выберите файл");
           return;
