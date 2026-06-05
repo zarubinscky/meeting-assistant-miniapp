@@ -4,19 +4,89 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Meeting Assistant</title>
+
+  <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.11.6/dist/ffmpeg.min.js"></script>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 24px;
+      background: #f7f7f8;
+      color: #111;
+    }
+
+    .card {
+      background: white;
+      padding: 24px;
+      border-radius: 16px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    }
+
+    h1 {
+      margin-top: 0;
+      font-size: 28px;
+    }
+
+    p {
+      line-height: 1.5;
+    }
+
+    input {
+      margin: 16px 0;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 12px;
+      background: #111;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    #status {
+      margin-top: 16px;
+      font-weight: bold;
+      white-space: pre-line;
+    }
+
+    .hint {
+      color: #666;
+      font-size: 14px;
+    }
+  </style>
 </head>
+
 <body>
-  <h1>Meeting Assistant</h1>
+  <div class="card">
+    <h1>Meeting Assistant</h1>
 
-  <p>Загрузите аудио или видео встречи. Результат придет в Telegram.</p>
+    <p>Загрузите аудио или видео встречи. Мы подготовим файл, отправим его на обработку, а результат придет в Telegram.</p>
 
-  <input type="file" id="fileInput" accept=".mp3,.mp4,.m4a,.wav,.webm,.ogg,.oga,.mpeg,.mpga,.flac,audio/*,video/*" />
+    <p class="hint">
+      Поддерживаются: MP3, MP4, M4A, WAV, WEBM, OGG.<br>
+      Максимальный размер файла для MVP: 100 МБ.
+    </p>
 
-  <br><br>
+    <input
+      type="file"
+      id="fileInput"
+      accept=".mp3,.mp4,.m4a,.wav,.webm,.ogg,.oga,.mpeg,.mpga,.flac,.mov,.m4v,audio/*,video/*"
+    />
 
-  <button onclick="sendFile()">Отправить на обработку</button>
+    <button id="sendButton" onclick="sendFile()">Отправить на обработку</button>
 
-  <p id="status"></p>
+    <p id="status"></p>
+  </div>
 
   <script>
     const SUPABASE_URL = "https://vaddfiksldaebnzaccks.supabase.co";
@@ -27,79 +97,168 @@
 
     const TELEGRAM_CHAT_ID = "65446025";
 
+    const MAX_FILE_SIZE_MB = 100;
+
+    const { createFFmpeg, fetchFile } = FFmpeg;
+
+    let ffmpeg = null;
+
     function setStatus(text) {
       document.getElementById("status").innerText = text;
     }
 
+    function setLoading(isLoading) {
+      document.getElementById("sendButton").disabled = isLoading;
+    }
+
+    function getExtension(fileName) {
+      return fileName.split(".").pop().toLowerCase();
+    }
+
     function makeSafeFileName(originalName) {
-      const extension = originalName.split(".").pop() || "file";
+      const extension = getExtension(originalName) || "mp3";
       return `meeting-${Date.now()}.${extension}`;
+    }
+
+    function shouldConvertToMp3(file) {
+      const ext = getExtension(file.name);
+
+      if (ext === "mp3") {
+        return false;
+      }
+
+      return true;
+    }
+
+    async function convertToMp3(file) {
+      setStatus("Подготавливаем файл...\nЗагружаем аудио-конвертер. Первый запуск может занять 10–30 секунд.");
+
+      if (!ffmpeg) {
+        ffmpeg = createFFmpeg({
+          log: true,
+          corePath: "https://unpkg.com/@ffmpeg/core@0.11.0/dist/ffmpeg-core.js"
+        });
+
+        await ffmpeg.load();
+      }
+
+      setStatus("Конвертируем файл в MP3...\nНе закрывайте страницу.");
+
+      const inputExt = getExtension(file.name) || "input";
+      const inputName = `input.${inputExt}`;
+      const outputName = "output.mp3";
+
+      ffmpeg.FS("writeFile", inputName, await fetchFile(file));
+
+      await ffmpeg.run(
+        "-i", inputName,
+        "-vn",
+        "-ac", "1",
+        "-ar", "16000",
+        "-b:a", "32k",
+        outputName
+      );
+
+      const data = ffmpeg.FS("readFile", outputName);
+
+      const mp3File = new File(
+        [data.buffer],
+        file.name.replace(/\.[^/.]+$/, "") + ".mp3",
+        { type: "audio/mpeg" }
+      );
+
+      console.log("Original size:", file.size);
+      console.log("Converted size:", mp3File.size);
+
+      return mp3File;
+    }
+
+    async function uploadToSupabase(file) {
+      const fileName = makeSafeFileName(file.name);
+
+      const uploadUrl = `${SUPABASE_URL}/storage/v1/object/meetings/${fileName}`;
+
+      const uploadResponse = await fetch(uploadUrl, {
+        method: "POST",
+        headers: {
+          "apikey": SUPABASE_KEY,
+          "Authorization": `Bearer ${SUPABASE_KEY}`,
+          "Content-Type": file.type || "application/octet-stream"
+        },
+        body: file
+      });
+
+      if (!uploadResponse.ok) {
+        const errorText = await uploadResponse.text();
+        console.error("Supabase upload error:", errorText);
+        throw new Error("Ошибка загрузки файла в Supabase");
+      }
+
+      return `${SUPABASE_URL}/storage/v1/object/public/meetings/${fileName}`;
+    }
+
+    async function startProcessing(fileUrl) {
+      const webhookResponse = await fetch(N8N_WEBHOOK_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          chat_id: TELEGRAM_CHAT_ID,
+          file_url: fileUrl
+        })
+      });
+
+      if (!webhookResponse.ok) {
+        const errorText = await webhookResponse.text();
+        console.error("n8n webhook error:", errorText);
+        throw new Error("Файл загружен, но обработку запустить не удалось");
+      }
     }
 
     async function sendFile() {
       try {
-        const file = document.getElementById("fileInput").files[0];
-        let processedFile = file;
-        if (!file) {
+        setLoading(true);
+
+        const originalFile = document.getElementById("fileInput").files[0];
+
+        if (!originalFile) {
           alert("Выберите файл");
+          setLoading(false);
           return;
         }
 
-        setStatus("Загрузка файла в хранилище...");
+        const fileSizeMb = originalFile.size / 1024 / 1024;
 
-        const fileName = makeSafeFileName(file.name);
-
-        const uploadUrl = `${SUPABASE_URL}/storage/v1/object/meetings/${fileName}`;
-
-        const uploadResponse = await fetch(uploadUrl, {
-          method: "POST",
-          headers: {
-            "apikey": SUPABASE_KEY,
-            "Authorization": `Bearer ${SUPABASE_KEY}`,
-            "Content-Type": file.type || "application/octet-stream"
-          },
-          body: file
-        });
-
-        if (!uploadResponse.ok) {
-          const errorText = await uploadResponse.text();
-          console.error("Supabase upload error:", errorText);
-          setStatus("Ошибка загрузки файла в Supabase");
+        if (fileSizeMb > MAX_FILE_SIZE_MB) {
+          setStatus(`Файл слишком большой: ${fileSizeMb.toFixed(1)} МБ.\nМаксимум: ${MAX_FILE_SIZE_MB} МБ.`);
+          setLoading(false);
           return;
         }
 
-        const fileUrl = `${SUPABASE_URL}/storage/v1/object/public/meetings/${fileName}`;
+        let processedFile = originalFile;
 
-        setStatus("Файл загружен. Запускаю обработку...");
-
-        const webhookResponse = await fetch(N8N_WEBHOOK_URL, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            chat_id: TELEGRAM_CHAT_ID,
-            file_url: fileUrl
-          })
-        });
-
-        if (!webhookResponse.ok) {
-          const errorText = await webhookResponse.text();
-          console.error("n8n webhook error:", errorText);
-          setStatus("Файл загружен, но не удалось запустить обработку");
-          return;
+        if (shouldConvertToMp3(originalFile)) {
+          processedFile = await convertToMp3(originalFile);
         }
 
-        setStatus("Готово. Обработка началась. Результат придет в Telegram.");
+        setStatus("Загружаем файл в хранилище...");
+
+        const fileUrl = await uploadToSupabase(processedFile);
+
+        setStatus("Файл загружен.\nЗапускаем обработку...");
+
+        await startProcessing(fileUrl);
+
+        setStatus("Готово. Обработка началась.\nРезультат придет в Telegram.");
 
       } catch (error) {
         console.error(error);
-        setStatus("Ошибка. Посмотрите консоль браузера.");
+        setStatus("Ошибка: " + error.message);
+      } finally {
+        setLoading(false);
       }
     }
   </script>
-  
-  <script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.10/dist/umd/ffmpeg.js"></script>
-  
 </body>
 </html>
