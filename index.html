@@ -97,6 +97,23 @@
 
     const MAX_FILE_SIZE_MB = 100;
 
+function setStatus(text) {
+  document.getElementById("status").innerText = text;
+}
+
+function setLoading(isLoading) {
+  document.getElementById("sendButton").disabled = isLoading;
+}
+
+function getExtension(fileName) {
+  return fileName.split(".").pop().toLowerCase();
+}
+
+function makeSafeFileName(originalName) {
+  const extension = getExtension(originalName) || "bin";
+  return `meeting-${Date.now()}.${extension}`;
+}
+    
     async function uploadToSupabase(file) {
       const fileName = makeSafeFileName(file.name);
 
