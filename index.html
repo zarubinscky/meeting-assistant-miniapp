@@ -76,9 +76,10 @@
     </p>
 
     <input
-      type="file"
-      id="fileInput"
-      accept=".mp3,.mp4,.m4a,.wav,.webm,.ogg,.oga,.mpeg,.mpga,.flac,.mov,.m4v,audio/*,video/*"
+     type="file"
+     id="fileInput"
+     accept=".mp3,.mp4,.m4a,.wav,.webm,.ogg,.oga,.mpeg,.mpga,.flac,.mov,.m4v,audio/*,video/*"
+     onchange="setLoading(false)"
     />
 
     <button id="sendButton" onclick="sendFile()">Отправить на обработку</button>
@@ -187,13 +188,17 @@ function makeSafeFileName(originalName) {
 
         await startProcessing(fileUrl);
 
-        setStatus("Готово. Обработка началась.\nРезультат придет в Telegram.");
+        setStatus("Готово. Обработка началась.\nРезультат придет в Telegram.\n\nДля нового запуска выберите другой файл.");
+
+        document.getElementById("fileInput").value = "";
+        setLoading(true);
 
       } catch (error) {
         console.error(error);
         setStatus("Ошибка: " + error.message);
       } finally {
-        setLoading(false);
+        const hasFile = !!document.getElementById("fileInput").files[0];
+        setLoading(!hasFile);
       }
     }
   </script>
