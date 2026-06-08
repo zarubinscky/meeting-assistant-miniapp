@@ -5,8 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Meeting Assistant</title>
 
-  <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.11.6/dist/ffmpeg.min.js"></script>
-
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -99,80 +97,6 @@
 
     const MAX_FILE_SIZE_MB = 100;
 
-    const { createFFmpeg, fetchFile } = FFmpeg;
-
-    let ffmpeg = null;
-
-    function setStatus(text) {
-      document.getElementById("status").innerText = text;
-    }
-
-    function setLoading(isLoading) {
-      document.getElementById("sendButton").disabled = isLoading;
-    }
-
-    function getExtension(fileName) {
-      return fileName.split(".").pop().toLowerCase();
-    }
-
-    function makeSafeFileName(originalName) {
-      const extension = getExtension(originalName) || "mp3";
-      return `meeting-${Date.now()}.${extension}`;
-    }
-
-    function shouldConvertToMp3(file) {
-      const ext = getExtension(file.name);
-
-      if (ext === "mp3") {
-        return false;
-      }
-
-      return true;
-    }
-
-    async function convertToMp3(file) {
-      setStatus("Подготавливаем файл...\nЗагружаем аудио-конвертер. Первый запуск может занять 10–30 секунд.");
-
-      if (!ffmpeg) {
-        ffmpeg = createFFmpeg({
-          log: true,
-          corePath: "https://unpkg.com/@ffmpeg/core@0.11.0/dist/ffmpeg-core.js"
-        });
-
-        await ffmpeg.load();
-      }
-
-      setStatus("Конвертируем файл в MP3...\nНе закрывайте страницу.");
-
-      const inputExt = getExtension(file.name) || "input";
-      const inputName = `input.${inputExt}`;
-      const outputName = "output.mp3";
-
-      ffmpeg.FS("writeFile", inputName, await fetchFile(file));
-
-      await ffmpeg.run(
-        "-i", inputName,
-        "-vn",
-        "-ac", "1",
-        "-ar", "16000",
-        "-b:a", "32k",
-        outputName
-      );
-
-      const data = ffmpeg.FS("readFile", outputName);
-
-      const mp3File = new File(
-        [data.buffer],
-        file.name.replace(/\.[^/.]+$/, "") + ".mp3",
-        { type: "audio/mpeg" }
-      );
-
-      console.log("Original size:", file.size);
-      console.log("Converted size:", mp3File.size);
-
-      return mp3File;
-    }
-
     async function uploadToSupabase(file) {
       const fileName = makeSafeFileName(file.name);
 
@@ -236,11 +160,7 @@
           return;
         }
 
-        let processedFile = originalFile;
-
-        if (shouldConvertToMp3(originalFile)) {
-          processedFile = await convertToMp3(originalFile);
-        }
+       const processedFile = originalFile;
 
         setStatus("Загружаем файл в хранилище...");
 
