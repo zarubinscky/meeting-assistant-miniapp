@@ -198,10 +198,14 @@
       <div id="status" class="status"></div>
 
       <div class="menu">
-        <button class="menu-button" type="button">📊 Баланс</button>
-        <button class="menu-button" type="button">💎 Пополнить минуты</button>
-        <button class="menu-button" type="button">ℹ️ О сервисе</button>
-        <button class="menu-button support" type="button">☎️ Поддержка</button>
+        <button id="balanceBtn" class="menu-button" type="button"> 📊 Баланс
+        </button>
+        <button id="topupBtn" class="menu-button" type="button"> 💎 Пополнить минуты
+        </button>
+        <button id="aboutBtn" class="menu-button" type="button"> ℹ️ О сервисе
+        </button>
+        <button id="supportBtn" class="menu-button support" type="button">  ☎️ Поддержка
+        </button>
       </div>
 
       <div class="footer-hint">
@@ -425,6 +429,20 @@
       fileInput.files = files;
       handleFileSelected();
     });
+    document.getElementById("balanceBtn").addEventListener("click", () => {
+  alert("Баланс будет подключен к базе данных");
+});
+document.getElementById("topupBtn").addEventListener("click", () => {
+  alert("Пополнение минут скоро будет доступно");
+});
+document.getElementById("aboutBtn").addEventListener("click", () => {
+  alert(
+    "MeetMind AI автоматически создает транскрипт, резюме, решения, задачи и риски по записи встречи."
+  );
+});
+document.getElementById("supportBtn").addEventListener("click", () => {
+  window.open("https://t.me/NickZZT", "_blank");
+});
   </script>
 </body>
 </html>
