@@ -429,11 +429,23 @@
       fileInput.files = files;
       handleFileSelected();
     });
-    document.getElementById("balanceBtn").addEventListener("click", () => {
+    document.getElementById("balanceBtn").addEventListener("click", async () => {
+
+  await fetch("https://zarubinscky.app.n8n.cloud/webhook-test/70affa0d-95ef-42c3-baf7-0c04f4b25b03", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+
+    body: JSON.stringify({
+      telegram_id: getTelegramChatId()
+    })
+  });
+      
   tg.showPopup({
-  title: "Баланс",
-  message: "Ваш текущий баланс минут.",
-  buttons: [{ type: "ok" }]
+    title: "Тест",
+    message: "Запрос отправлен в n8n",
+    buttons: [{ type: "ok" }]
 });
 });
 document.getElementById("topupBtn").addEventListener("click", () => {
