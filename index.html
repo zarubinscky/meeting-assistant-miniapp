@@ -460,13 +460,9 @@ if (!response.ok) {
   }
   
 });
-document.getElementById("topupBtn").addEventListener("click", () => {
-  tg.showPopup({
-  title: "О сервисе",
-  message: "MeetMind AI автоматически создает транскрипт, резюме, решения, задачи и риски по записи встречи.",
-  buttons: [{ type: "ok" }]
-
-});
+document.getElementById("topupBtn").addEventListener("click", async () => {
+  alert("TOPUP WORKS");
+  
 });
 document.getElementById("aboutBtn").addEventListener("click", () => {
   alert(
