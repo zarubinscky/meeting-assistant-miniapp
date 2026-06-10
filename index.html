@@ -430,10 +430,19 @@
       handleFileSelected();
     });
     document.getElementById("balanceBtn").addEventListener("click", () => {
-  alert("Баланс будет подключен к базе данных");
+  tg.showPopup({
+  title: "Баланс",
+  message: "Ваш текущий баланс минут.",
+  buttons: [{ type: "ok" }]
+});
 });
 document.getElementById("topupBtn").addEventListener("click", () => {
-  alert("Пополнение минут скоро будет доступно");
+  tg.showPopup({
+  title: "О сервисе",
+  message: "MeetMind AI автоматически создает транскрипт, резюме, решения, задачи и риски по записи встречи.",
+  buttons: [{ type: "ok" }]
+
+});
 });
 document.getElementById("aboutBtn").addEventListener("click", () => {
   alert(
