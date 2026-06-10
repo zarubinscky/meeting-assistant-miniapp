@@ -3,121 +3,305 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Meeting Assistant</title>
+  <title>MeetMind AI</title>
+
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
-      font-family: Arial, sans-serif;
-      max-width: 720px;
+      margin: 0;
+      padding: 20px;
+      font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Arial, sans-serif;
+      background: #f5f5f7;
+      color: #111827;
+    }
+
+    .app {
+      max-width: 520px;
       margin: 0 auto;
-      padding: 24px;
-      background: #f7f7f8;
-      color: #111;
     }
 
     .card {
-      background: white;
-      padding: 24px;
-      border-radius: 16px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+      background: #ffffff;
+      border-radius: 24px;
+      padding: 22px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
     }
 
-    h1 {
-      margin-top: 0;
+    .brand {
+      margin-bottom: 18px;
+    }
+
+    .brand-title {
       font-size: 28px;
+      font-weight: 800;
+      margin: 0;
     }
 
-    p {
+    .subtitle {
+      margin: 6px 0 0;
+      color: #6b7280;
+      font-size: 15px;
+      line-height: 1.45;
+    }
+
+    .value {
+      margin: 18px 0;
+      padding: 14px;
+      border-radius: 18px;
+      background: #f9fafb;
+      color: #374151;
+      font-size: 15px;
       line-height: 1.5;
     }
 
-    input {
-      margin: 16px 0;
-    }
-
-    button {
-      width: 100%;
-      padding: 14px;
-      border: none;
-      border-radius: 12px;
-      background: #111;
-      color: white;
-      font-size: 16px;
+    .dropzone {
+      border: 2px dashed #d1d5db;
+      border-radius: 20px;
+      padding: 24px 16px;
+      text-align: center;
+      background: #fafafa;
       cursor: pointer;
+      transition: 0.2s ease;
     }
 
-    button:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
+    .dropzone.dragover {
+      border-color: #111827;
+      background: #f3f4f6;
     }
 
-    #status {
-      margin-top: 16px;
-      font-weight: bold;
+    .drop-title {
+      font-size: 17px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .drop-subtitle {
+      font-size: 14px;
+      color: #6b7280;
+      line-height: 1.4;
+    }
+
+    input[type="file"] {
+      display: none;
+    }
+
+    .file-state {
+      margin: 14px 0;
+      padding: 12px;
+      border-radius: 14px;
+      background: #f3f4f6;
+      font-size: 14px;
+      color: #374151;
       white-space: pre-line;
     }
 
-    .hint {
-      color: #666;
+    .primary-button {
+      width: 100%;
+      padding: 15px 16px;
+      border: none;
+      border-radius: 16px;
+      background: #111827;
+      color: white;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.2s ease;
+    }
+
+    .primary-button:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .status {
+      margin-top: 14px;
       font-size: 14px;
+      font-weight: 600;
+      white-space: pre-line;
+      line-height: 1.45;
+    }
+
+    .menu {
+      margin-top: 18px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .menu-button {
+      padding: 13px 10px;
+      border: 1px solid #e5e7eb;
+      border-radius: 16px;
+      background: #ffffff;
+      color: #111827;
+      font-size: 14px;
+      font-weight: 650;
+      cursor: pointer;
+    }
+
+    .menu-button:active {
+      background: #f3f4f6;
+    }
+
+    .support {
+      grid-column: span 2;
+    }
+
+    .footer-hint {
+      margin-top: 14px;
+      text-align: center;
+      color: #9ca3af;
+      font-size: 12px;
+      line-height: 1.4;
     }
   </style>
 </head>
 
 <body>
-  <div class="card">
-    <h1>Meeting Assistant</h1>
+  <div class="app">
+    <div class="card">
+      <div class="brand">
+        <h1 class="brand-title">🧠 MeetMind AI</h1>
+        <p class="subtitle">
+          AI-секретарь встреч — загрузите файл, получите транскрипт и краткое резюме встречи.
+        </p>
+      </div>
 
-    <p>Загрузите аудио или видео встречи. Мы подготовим файл, отправим его на обработку, а результат придет в Telegram.</p>
+      <div class="value">
+        Поддерживаются: MP3, M4A, MP4, WAV, WEBM, OGG.<br>
+        Максимальный размер файла: 100 МБ.
+      </div>
 
-    <p class="hint">
-      Поддерживаются: MP3, MP4, M4A, WAV, WEBM, OGG.<br>
-      Максимальный размер файла для MVP: 100 МБ.
-    </p>
+      <div id="dropzone" class="dropzone" onclick="openFileDialog()">
+        <div class="drop-title">📎 Загрузите или перетащите файл</div>
+        <div class="drop-subtitle">Аудио или видео с записью встречи</div>
+      </div>
 
-    <input
-     type="file"
-     id="fileInput"
-     accept=".mp3,.mp4,.m4a,.wav,.webm,.ogg,.oga,.mpeg,.mpga,.flac,.mov,.m4v,audio/*,video/*"
-     onchange="setLoading(false)"
-    />
+      <input
+        type="file"
+        id="fileInput"
+        accept=".mp3,.mp4,.m4a,.wav,.webm,.ogg,.oga,.mpeg,.mpga,.flac,.mov,.m4v,audio/*,video/*"
+        onchange="handleFileSelected()"
+      />
 
-    <button id="sendButton" onclick="sendFile()">Отправить на обработку</button>
+      <div id="fileState" class="file-state">Файл не загружен</div>
 
-    <p id="status"></p>
+      <button id="sendButton" class="primary-button" onclick="sendFile()" disabled>
+        🚀 Отправить на обработку
+      </button>
+
+      <div id="status" class="status"></div>
+
+      <div class="menu">
+        <button class="menu-button" type="button">📊 Баланс</button>
+        <button class="menu-button" type="button">💎 Пополнить минуты</button>
+        <button class="menu-button" type="button">ℹ️ О сервисе</button>
+        <button class="menu-button support" type="button">☎️ Поддержка</button>
+      </div>
+
+      <div class="footer-hint">
+        Результат придет в Telegram после обработки.
+      </div>
+    </div>
   </div>
 
   <script>
     const SUPABASE_URL = "https://vaddfiksldaebnzaccks.supabase.co";
 
-    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZhZGRmaWtzbGRhZWJuemFjY2tzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwNTI4NjEsImV4cCI6MjA5NTYyODg2MX0.VX7U-D1_syZLraknk5drh1Ctl23F6HpADo7d_HhUJiQ";
+    const SUPABASE_KEY = "65446025";
 
     const N8N_WEBHOOK_URL = "https://zarubinscky.app.n8n.cloud/webhook/113c46f6-165e-461e-8a6b-b37e1a0e735f";
 
-    const TELEGRAM_CHAT_ID = "65446025";
+    const FALLBACK_TELEGRAM_CHAT_ID = "65446025";
 
     const MAX_FILE_SIZE_MB = 100;
 
-function setStatus(text) {
-  document.getElementById("status").innerText = text;
-}
+    let isProcessing = false;
 
-function setLoading(isLoading) {
-  document.getElementById("sendButton").disabled = isLoading;
-}
+    const tg = window.Telegram?.WebApp;
 
-function getExtension(fileName) {
-  return fileName.split(".").pop().toLowerCase();
-}
+    if (tg) {
+      tg.ready();
+      tg.expand();
+    }
 
-function makeSafeFileName(originalName) {
-  const extension = getExtension(originalName) || "bin";
-  return `meeting-${Date.now()}.${extension}`;
-}
-    
+    function getTelegramChatId() {
+      const telegramUserId = tg?.initDataUnsafe?.user?.id;
+      return telegramUserId ? String(telegramUserId) : FALLBACK_TELEGRAM_CHAT_ID;
+    }
+
+    function setStatus(text) {
+      document.getElementById("status").innerText = text || "";
+    }
+
+    function setFileState(text) {
+      document.getElementById("fileState").innerText = text;
+    }
+
+    function setLoading(isLoading) {
+      const button = document.getElementById("sendButton");
+
+      if (isLoading) {
+        button.disabled = true;
+        button.innerText = "⏳ Отправляем...";
+      } else {
+        const hasFile = !!document.getElementById("fileInput").files[0];
+        button.disabled = !hasFile;
+        button.innerText = "🚀 Отправить на обработку";
+      }
+    }
+
+    function openFileDialog() {
+      if (isProcessing) return;
+      document.getElementById("fileInput").click();
+    }
+
+    function getExtension(fileName) {
+      const parts = fileName.split(".");
+      return parts.length > 1 ? parts.pop().toLowerCase() : "bin";
+    }
+
+    function makeSafeFileName(originalName) {
+      const extension = getExtension(originalName);
+      return `meeting-${Date.now()}.${extension}`;
+    }
+
+    function formatFileSize(bytes) {
+      const mb = bytes / 1024 / 1024;
+      return `${mb.toFixed(1)} МБ`;
+    }
+
+    function handleFileSelected() {
+      if (isProcessing) return;
+
+      const file = document.getElementById("fileInput").files[0];
+
+      if (!file) {
+        setFileState("Файл не загружен");
+        document.getElementById("sendButton").disabled = true;
+        return;
+      }
+
+      const fileSizeMb = file.size / 1024 / 1024;
+
+      if (fileSizeMb > MAX_FILE_SIZE_MB) {
+        setFileState(`Файл слишком большой: ${fileSizeMb.toFixed(1)} МБ\nМаксимум: ${MAX_FILE_SIZE_MB} МБ`);
+        document.getElementById("sendButton").disabled = true;
+        return;
+      }
+
+      setFileState(`📄 ${file.name}\nРазмер: ${formatFileSize(file.size)}`);
+      setStatus("");
+      document.getElementById("sendButton").disabled = false;
+    }
+
     async function uploadToSupabase(file) {
       const fileName = makeSafeFileName(file.name);
-
       const uploadUrl = `${SUPABASE_URL}/storage/v1/object/meetings/${fileName}`;
 
       const uploadResponse = await fetch(uploadUrl, {
@@ -140,13 +324,15 @@ function makeSafeFileName(originalName) {
     }
 
     async function startProcessing(fileUrl) {
+      const chatId = getTelegramChatId();
+
       const webhookResponse = await fetch(N8N_WEBHOOK_URL, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          chat_id: TELEGRAM_CHAT_ID,
+          chat_id: chatId,
           file_url: fileUrl
         })
       });
@@ -159,48 +345,86 @@ function makeSafeFileName(originalName) {
     }
 
     async function sendFile() {
+      if (isProcessing) return;
+
       try {
-        setLoading(true);
+        const fileInput = document.getElementById("fileInput");
+        const file = fileInput.files[0];
 
-        const originalFile = document.getElementById("fileInput").files[0];
-
-        if (!originalFile) {
-          alert("Выберите файл");
-          setLoading(false);
+        if (!file) {
+          setFileState("Файл не загружен");
           return;
         }
 
-        const fileSizeMb = originalFile.size / 1024 / 1024;
+        const fileSizeMb = file.size / 1024 / 1024;
 
         if (fileSizeMb > MAX_FILE_SIZE_MB) {
-          setStatus(`Файл слишком большой: ${fileSizeMb.toFixed(1)} МБ.\nМаксимум: ${MAX_FILE_SIZE_MB} МБ.`);
-          setLoading(false);
+          setFileState(`Файл слишком большой: ${fileSizeMb.toFixed(1)} МБ\nМаксимум: ${MAX_FILE_SIZE_MB} МБ`);
           return;
         }
 
-       const processedFile = originalFile;
+        isProcessing = true;
+        setLoading(true);
 
-        setStatus("Загружаем файл в хранилище...");
+        setStatus("⏳ Загружаем файл...\nПожалуйста, не закрывайте окно.");
 
-        const fileUrl = await uploadToSupabase(processedFile);
+        const fileUrl = await uploadToSupabase(file);
 
-        setStatus("Файл загружен.\nЗапускаем обработку...");
+        setStatus("✅ Файл загружен.\nЗапускаем обработку...");
 
         await startProcessing(fileUrl);
 
-        setStatus("Готово. Обработка началась.\nРезультат придет в Telegram.\n\nДля нового запуска выберите другой файл.");
+        setStatus(
+          "✅ Файл отправлен.\n\n" +
+          "Результат придет в Telegram.\n\n" +
+          "Обычно обработка занимает от 1 до 5 минут.\n" +
+          "Для длинных записей время может быть больше."
+        );
 
-        document.getElementById("fileInput").value = "";
-        setLoading(true);
+        fileInput.value = "";
+        setFileState("Файл отправлен на обработку");
+
+        const button = document.getElementById("sendButton");
+        button.disabled = true;
+        button.innerText = "✅ Отправлено";
 
       } catch (error) {
         console.error(error);
+        isProcessing = false;
+        setLoading(false);
         setStatus("Ошибка: " + error.message);
-      } finally {
-        const hasFile = !!document.getElementById("fileInput").files[0];
-        setLoading(!hasFile);
       }
     }
+
+    const dropzone = document.getElementById("dropzone");
+    const fileInput = document.getElementById("fileInput");
+
+    ["dragenter", "dragover"].forEach(eventName => {
+      dropzone.addEventListener(eventName, event => {
+        event.preventDefault();
+        event.stopPropagation();
+        if (!isProcessing) dropzone.classList.add("dragover");
+      });
+    });
+
+    ["dragleave", "drop"].forEach(eventName => {
+      dropzone.addEventListener(eventName, event => {
+        event.preventDefault();
+        event.stopPropagation();
+        dropzone.classList.remove("dragover");
+      });
+    });
+
+    dropzone.addEventListener("drop", event => {
+      if (isProcessing) return;
+
+      const files = event.dataTransfer.files;
+
+      if (!files || !files.length) return;
+
+      fileInput.files = files;
+      handleFileSelected();
+    });
   </script>
 </body>
 </html>
