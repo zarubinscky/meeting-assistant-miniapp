@@ -446,17 +446,10 @@ document.getElementById("balanceBtn").addEventListener("click", async () => {
         })
       }
     );
-    const data = await response.json();
-    tg.showPopup({
-      title: "📊 Баланс",
-      message:
-`Тариф: ${data.plan}
-⏳ Осталось минут: ${data.remaining_minutes}
-📈 Использовано минут: ${data.used_minutes}
-📄 Обработано файлов: ${data.files_used}
-💎 Дополнительных минут: ${data.paid_minutes}`,
-      buttons: [{ type: "ok" }]
-    });
+if (!response.ok) {
+  throw new Error("Ошибка получения баланса");
+}
+    
   } catch (error) {
     tg.showPopup({
       title: "Ошибка",
