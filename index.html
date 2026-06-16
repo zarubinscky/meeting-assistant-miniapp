@@ -263,8 +263,6 @@ function setButtonLoading(buttonId, loadingText, isLoading) {
     button.innerText = button.dataset.originalText;
   }
 }
-    function setFileState(text) {
-      document.getElementById("fileState").innerText = text;
       function setFileState(text, canRemove = false) {
     const fileState = document.getElementById("fileState");
     if (canRemove) {
