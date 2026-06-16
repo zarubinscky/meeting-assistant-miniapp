@@ -253,6 +253,22 @@
   }
 }
 
+function setButtonLoading(buttonId, loadingText, isLoading) {
+  const button = document.getElementById(buttonId);
+
+  if (!button.dataset.originalText) {
+    button.dataset.originalText = button.innerText;
+  }
+
+  if (isLoading) {
+    button.disabled = true;
+    button.innerText = loadingText;
+  } else {
+    button.disabled = false;
+    button.innerText = button.dataset.originalText;
+  }
+}
+
     function setFileState(text) {
       document.getElementById("fileState").innerText = text;
     }
