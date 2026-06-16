@@ -485,7 +485,7 @@ document.getElementById("balanceBtn").addEventListener("click", async () => {
 document.getElementById("topupBtn").addEventListener("click", async () => {
  setButtonLoading("topupBtn", "⏳ Отправляем...", true);
   try {
-    setStatus("💎 Сообщение с оплатой отправлено в бот.", true);
+    setStatus("💎 Список тарифов отправлен в бот.", true);
     tg.openTelegramLink(
       "https://t.me/nikolai_ai_secretary_bot?start=pricing"
     );
