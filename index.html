@@ -148,10 +148,6 @@
       background: #f3f4f6;
     }
 
-    .support {
-      grid-column: span 2;
-    }
-
     .footer-hint {
       margin-top: 14px;
       text-align: center;
@@ -443,15 +439,19 @@ function setButtonLoading(buttonId, loadingText, isLoading) {
       });
     });
 
-    dropzone.addEventListener("drop", event => {
-      if (isProcessing) return;
+    dropzone.addEventListener("drop", (event) => {
+    if (isProcessing) return;
+    event.preventDefault();
+    event.stopPropagation();
+    dropzone.classList.remove("dragover");
+      
+    const dt = new DataTransfer();
+    for (const file of event.dataTransfer.files) {
+        dt.items.add(file);
+    }
+    fileInput.files = dt.files;
+    handleFileSelected();
 
-      const files = event.dataTransfer.files;
-
-      if (!files || !files.length) return;
-
-      fileInput.files = files;
-      handleFileSelected();
     });
     
 document.getElementById("balanceBtn").addEventListener("click", async () => {
@@ -487,7 +487,7 @@ document.getElementById("topupBtn").addEventListener("click", async () => {
   try {
     setStatus("💎 Сообщение с оплатой отправлено в бот.", true);
     tg.openTelegramLink(
-      "https://t.me/MeetMindAIBot?start=pricing"
+      "https://t.me/nikolai_ai_secretary_bot?start=pricing"
     );
   } catch (error) {
     setStatus("❌ Не удалось открыть оплату.", true);
