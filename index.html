@@ -237,7 +237,6 @@
     function getTelegramChatId() {
       const telegramUserId = tg?.initDataUnsafe?.user?.id;
       return telegramUserId ? String(telegramUserId) : FALLBACK_TELEGRAM_CHAT_ID;
-    }
 
     }
     function setStatus(text, autoClear = false) {
@@ -481,17 +480,14 @@ document.getElementById("balanceBtn").addEventListener("click", async () => {
   } finally {
     setButtonLoading("balanceBtn", "", false);
   }
-    });
-    console.error(error);
-  }
-  
-});
+  });
+    
 document.getElementById("topupBtn").addEventListener("click", async () => {
  setButtonLoading("topupBtn", "⏳ Отправляем...", true);
   try {
     setStatus("💎 Сообщение с оплатой отправлено в бот.", true);
     tg.openTelegramLink(
-      "https://t.me/nikolai_ai_secretary_bot?start=pricing"
+      "https://t.me/MeetMindAIBot?start=pricing"
     );
   } catch (error) {
     setStatus("❌ Не удалось открыть оплату.", true);
@@ -502,12 +498,15 @@ document.getElementById("topupBtn").addEventListener("click", async () => {
 
 });
 document.getElementById("aboutBtn").addEventListener("click", () => {
-  alert(
-    "MeetMind AI автоматически создает транскрипт, резюме, решения, задачи и риски по записи встречи."
+  setStatus(
+    "ℹ️ MeetMind AI создает транскрипт, резюме, задачи, решения и риски.",
+    true
   );
 });
 document.getElementById("supportBtn").addEventListener("click", () => {
-  window.open("https://t.me/NickZZT", "_blank");
+ tg.openTelegramLink(
+  "https://t.me/NickZZT"
+);
 });
   </script>
 </body>
