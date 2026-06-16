@@ -133,11 +133,29 @@
       color: #111827;
     }
 
+    .info-panel {
+      display: none;
+      margin-top: 12px;
+      padding: 14px;
+      border-radius: 16px;
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      color: #374151;
+      font-size: 14px;
+      line-height: 1.5;
+      white-space: pre-line;
+    }
+
+    .info-panel.visible {
+      display: block;
+    }
+
     .menu {
       margin-top: 18px;
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 10px;
+      align-items: stretch;
     }
 
     .menu-button {
@@ -153,6 +171,7 @@
       cursor: pointer;
       transition: 0.2s ease;
       text-align: center;
+      width: 100%;
     }
 
     .menu-button:active {
@@ -221,6 +240,7 @@
       </button>
 
       <div id="status" class="status"></div>
+      <div id="infoPanel" class="info-panel"></div>
 
       <div class="menu">
         <button id="balanceBtn" class="menu-button" type="button">📊 Баланс</button>
@@ -248,7 +268,7 @@
     const BOT_PRICING_LINK =
       "https://t.me/nikolai_ai_secretary_bot?start=pricing";
 
-    const SUPPORT_LINK = "https://t.me/NickZZT";
+    const BOT_LINK = "https://t.me/nikolai_ai_secretary_bot";
     const FALLBACK_TELEGRAM_CHAT_ID = "65446025";
     const MAX_FILE_SIZE_MB = 100;
 
@@ -268,6 +288,7 @@
       fileState: document.getElementById("fileState"),
       sendButton: document.getElementById("sendButton"),
       status: document.getElementById("status"),
+      infoPanel: document.getElementById("infoPanel"),
       balanceBtn: document.getElementById("balanceBtn"),
       topupBtn: document.getElementById("topupBtn"),
       aboutBtn: document.getElementById("aboutBtn"),
@@ -277,6 +298,20 @@
     function getTelegramChatId() {
       const telegramUserId = tg?.initDataUnsafe?.user?.id;
       return telegramUserId ? String(telegramUserId) : FALLBACK_TELEGRAM_CHAT_ID;
+    }
+
+    function clearInfoPanel() {
+      elements.infoPanel.classList.remove("visible");
+      elements.infoPanel.innerText = "";
+    }
+
+    function setInfoPanel(text) {
+      elements.infoPanel.innerText = text || "";
+      if (text) {
+        elements.infoPanel.classList.add("visible");
+      } else {
+        elements.infoPanel.classList.remove("visible");
+      }
     }
 
     function setStatus(text, autoClear = false) {
@@ -333,15 +368,6 @@
       window.open(url, "_blank");
     }
 
-    function openExternalLink(url) {
-      if (tg?.openLink) {
-        tg.openLink(url);
-        return;
-      }
-
-      window.open(url, "_blank");
-    }
-
     function getExtension(fileName) {
       const parts = fileName.split(".");
       return parts.length > 1 ? parts.pop().toLowerCase() : "bin";
@@ -379,6 +405,8 @@
 
     function handleFileSelected() {
       if (isProcessing) return;
+
+      clearInfoPanel();
 
       const file = elements.fileInput.files[0];
       const validationError = validateFile(file);
@@ -425,6 +453,7 @@
         },
         body: JSON.stringify({
           chat_id: getTelegramChatId(),
+          telegram_id: getTelegramChatId(),
           file_url: fileUrl
         })
       });
@@ -438,6 +467,8 @@
 
     async function sendFile() {
       if (isProcessing) return;
+
+      clearInfoPanel();
 
       const file = elements.fileInput.files[0];
       const validationError = validateFile(file);
@@ -477,16 +508,22 @@
     }
 
     async function requestBalance() {
+      clearInfoPanel();
       setButtonLoading(elements.balanceBtn, "⏳ Отправляем...", true);
 
       try {
+        const telegramId = getTelegramChatId();
+
         const response = await fetch(BALANCE_WEBHOOK_URL, {
           method: "POST",
           headers: {
             "Content-Type": "application/json"
           },
           body: JSON.stringify({
-            telegram_id: getTelegramChatId()
+            telegram_id: telegramId,
+            chat_id: telegramId,
+            source: "mini_app",
+            action: "balance"
           })
         });
 
@@ -504,29 +541,35 @@
     }
 
     async function openTopup() {
-      setButtonLoading(elements.topupBtn, "⏳ Отправляем...", true);
+      clearInfoPanel();
+      setButtonLoading(elements.topupBtn, "⏳ Открываем...", true);
 
       try {
-        setStatus("💎 Сообщение с оплатой отправлено в бот.", true);
+        setStatus("💎 Открываем тарифы в боте.", true);
         openTelegramLink(BOT_PRICING_LINK);
       } catch (error) {
         console.error(error);
-        setStatus("❌ Не удалось открыть оплату.", true);
+        setStatus("❌ Не удалось открыть тарифы.", true);
       } finally {
         setButtonLoading(elements.topupBtn, "", false);
       }
     }
 
     function showAbout() {
-      setStatus(
-        "ℹ️ MeetMind AI создает транскрипт, резюме, решения, задачи и риски по записи встречи.",
-        true
+      setStatus("");
+      setInfoPanel(
+        "ℹ️ О сервисе\n\n" +
+        "MeetMind AI автоматически создает транскрипт, краткое резюме, решения, задачи и риски по записи встречи.\n\n" +
+        "Поддерживаются MP3, M4A, MP4, WAV, WEBM и OGG.\n" +
+        "Максимальный размер файла: 100 МБ.\n\n" +
+        "Результат приходит сообщением в Telegram."
       );
     }
 
     function openSupport() {
-      setStatus("☎️ Открываем поддержку.", true);
-      openExternalLink(SUPPORT_LINK);
+      clearInfoPanel();
+      setStatus("☎️ Открываем бот поддержки.", true);
+      openTelegramLink(BOT_LINK);
     }
 
     function initDropzone() {
