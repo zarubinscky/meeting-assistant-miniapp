@@ -209,7 +209,7 @@
       </div>
 
       <div class="footer-hint">
-        Результат придет в Telegram после обработки.
+        Все результаты и уведомления приходят в Telegram.
       </div>
     </div>
   </div>
@@ -239,9 +239,19 @@
       return telegramUserId ? String(telegramUserId) : FALLBACK_TELEGRAM_CHAT_ID;
     }
 
-    function setStatus(text) {
-      document.getElementById("status").innerText = text || "";
     }
+    function setStatus(text, autoClear = false) {
+  const status = document.getElementById("status");
+  status.innerText = text || "";
+  if (window.statusTimer) {
+    clearTimeout(window.statusTimer);
+  }
+  if (autoClear && text) {
+    window.statusTimer = setTimeout(() => {
+      status.innerText = "";
+    }, 2500);
+  }
+}
 
     function setFileState(text) {
       document.getElementById("fileState").innerText = text;
@@ -379,10 +389,9 @@
         await startProcessing(fileUrl);
 
         setStatus(
-          "✅ Файл отправлен.\n\n" +
-          "Результат придет в Telegram.\n\n" +
-          "Обычно обработка занимает от 1 до 5 минут.\n" +
-          "Для длинных записей время может быть больше."
+          "✅ Отчет отправлен в бот.\n\n" +
+          "Обычно обработка занимает 1–5 минут.",
+          true
         );
 
         fileInput.value = "";
@@ -431,7 +440,7 @@
     });
     
 document.getElementById("balanceBtn").addEventListener("click", async () => {
-
+  setButtonLoading("balanceBtn", "⏳ Отправляем...", true);
   try {
 
     const response = await fetch(
@@ -446,22 +455,34 @@ document.getElementById("balanceBtn").addEventListener("click", async () => {
         })
       }
     );
-if (!response.ok) {
-  throw new Error("Ошибка получения баланса");
-}
-    
+    if (!response.ok) {
+      throw new Error("Ошибка получения баланса");
+    }
+    setStatus("✅ Баланс отправлен в бот.", true);
   } catch (error) {
-    tg.showPopup({
-      title: "Ошибка",
-      message: "Не удалось получить баланс",
-      buttons: [{ type: "ok" }]
+    setStatus("❌ Не удалось получить баланс.", true);
+    console.error(error);
+  } finally {
+    setButtonLoading("balanceBtn", "", false);
+  }
     });
     console.error(error);
   }
   
 });
 document.getElementById("topupBtn").addEventListener("click", async () => {
-  alert("TOPUP CLICK");
+ setButtonLoading("topupBtn", "⏳ Отправляем...", true);
+  try {
+    setStatus("💎 Сообщение с оплатой отправлено в бот.", true);
+    tg.openTelegramLink(
+      "https://t.me/nikolai_ai_secretary_bot?start=pricing"
+    );
+  } catch (error) {
+    setStatus("❌ Не удалось открыть оплату.", true);
+    console.error(error);
+  } finally {
+    setButtonLoading("topupBtn", "", false);
+  };
 
 });
 document.getElementById("aboutBtn").addEventListener("click", () => {
