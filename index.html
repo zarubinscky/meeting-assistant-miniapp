@@ -263,11 +263,30 @@ function setButtonLoading(buttonId, loadingText, isLoading) {
     button.innerText = button.dataset.originalText;
   }
 }
-
     function setFileState(text) {
       document.getElementById("fileState").innerText = text;
+      function setFileState(text, canRemove = false) {
+    const fileState = document.getElementById("fileState");
+    if (canRemove) {
+        fileState.innerHTML =
+            '<span>' + text + '</span>' +
+            '<button type="button" id="removeFileBtn" class="remove-file-btn">✕</button>';
+        document.getElementById("removeFileBtn").addEventListener("click", clearSelectedFile);
+    } else {
+        fileState.innerText = text;
     }
 
+  }
+    function clearSelectedFile() {
+    const fileInput = document.getElementById("fileInput");
+    const button = document.getElementById("sendButton");
+       fileInput.value = "";
+    setFileState("Файл не загружен", false);
+    setStatus("", false);
+    button.disabled = true;
+    button.innerText = "🚀 Отправить на обработку";
+
+  }
     function setLoading(isLoading) {
       const button = document.getElementById("sendButton");
 
@@ -320,7 +339,7 @@ function setButtonLoading(buttonId, loadingText, isLoading) {
         return;
       }
 
-      setFileState(`📄 ${file.name}\nРазмер: ${formatFileSize(file.size)}`);
+      setFileState(`📄 ${file.name}\nРазмер: ${formatFileSize(file.size)}`, true);
       setStatus("");
       document.getElementById("sendButton").disabled = false;
     }
