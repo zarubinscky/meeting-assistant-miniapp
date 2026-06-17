@@ -146,8 +146,8 @@
 
     .menu-button:active {
       background: #f3f4f6;
+      
     }
-
     .footer-hint {
       margin-top: 14px;
       text-align: center;
@@ -155,6 +155,38 @@
       font-size: 12px;
       line-height: 1.4;
     }
+#fileState {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.file-info {
+    flex: 1;
+    white-space: pre-line;
+}
+.remove-file-btn {
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    border: none;
+    background: transparent;
+    color: #9CA3AF;
+    font-size: 20px;
+    font-weight: 400;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: .15s ease;
+}
+.remove-file-btn:hover {
+    background: #F3F4F6;
+    color: #6B7280;
+}
+.remove-file-btn:active {
+    background: #E5E7EB;
+}
+
   </style>
 </head>
 
@@ -267,8 +299,8 @@ function setButtonLoading(buttonId, loadingText, isLoading) {
     const fileState = document.getElementById("fileState");
     if (canRemove) {
         fileState.innerHTML =
-            '<span>' + text + '</span>' +
-            '<button type="button" id="removeFileBtn" class="remove-file-btn">✕</button>';
+    '<span class="file-info">' + text + '</span>' +
+    '<button type="button" id="removeFileBtn" class="remove-file-btn" aria-label="Удалить файл">✕</button>';
         document.getElementById("removeFileBtn").addEventListener("click", clearSelectedFile);
     } else {
         fileState.innerText = text;
