@@ -547,15 +547,18 @@ document.getElementById("topupBtn").addEventListener("click", async () => {
 
 });
 document.getElementById("aboutBtn").addEventListener("click", () => {
-  setStatus(
-    "ℹ️ MeetMind AI создает транскрипт, резюме, задачи, решения и риски.",
-    true
+  setStatus("ℹ️ Информация о сервисе отправлена в бот.", true);
+  tg.openTelegramLink(
+    "https://t.me/nikolai_ai_secretary_bot?start=about"
   );
+  
 });
 document.getElementById("supportBtn").addEventListener("click", () => {
- tg.openTelegramLink(
-  "https://t.me/NickZZT"
-);
+  setStatus("☎️ Информация о поддержке отправлена в бот.", true);
+  tg.openTelegramLink(
+    "https://t.me/nikolai_ai_secretary_bot?start=help"
+  );
+
 });
   </script>
 </body>
