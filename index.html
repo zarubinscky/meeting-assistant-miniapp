@@ -230,7 +230,7 @@
         </button>
         <button id="topupBtn" class="menu-button" type="button"> 💎 Пополнить минуты
         </button>
-        <button id="aboutBtn" class="menu-button" type="button"> ℹ️ О сервисе
+        <button id="aboutBtn" class="menu-button" type="button"> ❓ Как начать
         </button>
         <button id="supportBtn" class="menu-button support" type="button">  ☎️ Поддержка
         </button>
@@ -547,7 +547,7 @@ document.getElementById("topupBtn").addEventListener("click", async () => {
 
 });
 document.getElementById("aboutBtn").addEventListener("click", () => {
-  setStatus("ℹ️ Информация о сервисе отправлена в бот.", true);
+  setStatus("❓ Инструкция отправлена в Telegram.", true);
   tg.openTelegramLink(
     "https://t.me/nikolai_ai_secretary_bot?start=about"
   );
