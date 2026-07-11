@@ -202,7 +202,7 @@
 
       <div class="value">
         Поддерживаются: MP3, M4A, MP4, WAV, WEBM, OGG.<br>
-        Максимальный размер файла: 1 ГБ.
+        Максимальный размер файла: 100 МБ.
       </div>
 
       <div id="dropzone" class="dropzone" onclick="openFileDialog()">
@@ -251,7 +251,7 @@
 
     const FALLBACK_TELEGRAM_CHAT_ID = "65446025";
 
-    const MAX_FILE_SIZE_MB = 1024;
+    const MAX_FILE_SIZE_MB = 100;
 
     let isProcessing = false;
 
@@ -295,7 +295,7 @@ function setButtonLoading(buttonId, loadingText, isLoading) {
     button.innerText = button.dataset.originalText;
   }
 }
-      function text, canRemove = false) {
+      function setFileState(text, canRemove = false) {
     const fileState = document.getElementById("fileState");
     if (canRemove) {
         fileState.innerHTML =
@@ -311,7 +311,7 @@ function setButtonLoading(buttonId, loadingText, isLoading) {
     const fileInput = document.getElementById("fileInput");
     const button = document.getElementById("sendButton");
        fileInput.value = "";
-    "Файл не загружен", false);
+    setFileState("Файл не загружен", false);
     setStatus("", false);
     button.disabled = true;
     button.innerText = "🚀 Отправить на обработку";
@@ -356,7 +356,7 @@ function setButtonLoading(buttonId, loadingText, isLoading) {
       const file = document.getElementById("fileInput").files[0];
 
       if (!file) {
-        "Файл не загружен");
+        setFileState("Файл не загружен");
         document.getElementById("sendButton").disabled = true;
         return;
       }
@@ -364,10 +364,7 @@ function setButtonLoading(buttonId, loadingText, isLoading) {
       const fileSizeMb = file.size / 1024 / 1024;
 
       if (fileSizeMb > MAX_FILE_SIZE_MB) {
-        setFileState(
-          `Файл слишком большой: ${fileSizeMb.toFixed(1)} МБ\nМаксимум: ${MAX_FILE_SIZE_MB} МБ`,
-           true
-      );
+        setFileState(`Файл слишком большой: ${fileSizeMb.toFixed(1)} МБ\nМаксимум: ${MAX_FILE_SIZE_MB} МБ`);
         document.getElementById("sendButton").disabled = true;
         return;
       }
@@ -429,14 +426,14 @@ function setButtonLoading(buttonId, loadingText, isLoading) {
         const file = fileInput.files[0];
 
         if (!file) {
-          "Файл не загружен");
+          setFileState("Файл не загружен");
           return;
         }
 
         const fileSizeMb = file.size / 1024 / 1024;
 
         if (fileSizeMb > MAX_FILE_SIZE_MB) {
-          `Файл слишком большой: ${fileSizeMb.toFixed(1)} МБ\nМаксимум: ${MAX_FILE_SIZE_MB} МБ`);
+          setFileState(`Файл слишком большой: ${fileSizeMb.toFixed(1)} МБ\nМаксимум: ${MAX_FILE_SIZE_MB} МБ`);
           return;
         }
 
@@ -458,7 +455,7 @@ function setButtonLoading(buttonId, loadingText, isLoading) {
         );
 
         fileInput.value = "";
-        "Файл отправлен на обработку");
+        setFileState("Файл отправлен на обработку");
 
         const button = document.getElementById("sendButton");
         button.disabled = true;
