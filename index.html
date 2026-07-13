@@ -250,7 +250,14 @@
 
     const N8N_WEBHOOK_URL = "https://zarubinscky.app.n8n.cloud/webhook/113c46f6-165e-461e-8a6b-b37e1a0e735f";
 
-    const FALLBACK_TELEGRAM_CHAT_ID = "65446025";
+    function getTelegramChatId() {
+    const telegramUserId = tg?.initDataUnsafe?.user?.id;
+
+    if (!telegramUserId) {
+    throw new Error("Откройте MeetMind AI через Telegram.");
+    }
+    return String(telegramUserId);
+    }
 
     const MAX_FILE_SIZE_MB = 1024;
 
