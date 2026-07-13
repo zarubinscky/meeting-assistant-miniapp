@@ -376,7 +376,39 @@ function setButtonLoading(buttonId, loadingText, isLoading) {
     }
 
     async function preflightInitialCheck(file) {
+  const chatId = getTelegramChatId();
+  const response = await fetch(
+    `${SUPABASE_URL}/functions/v1/preflight`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "apikey": SUPABASE_KEY,
+        "Authorization": `Bearer ${SUPABASE_KEY}`
+      },
+      body: JSON.stringify({
+        mode: "initial_check",
+        telegram_id: chatId,
+        file_name: file.name,
+        file_size_bytes: file.size,
+        mime_type: file.type
+      })
     }
+  );
+
+  if (!response.ok) {
+    throw new Error("Не удалось выполнить проверку файла.");
+  }
+
+  const result = await response.json();
+  console.log("Preflight:", result);
+
+  if (!result.allowed) {
+    throw new Error(result.message || "Файл не прошёл проверку.");
+  }
+
+  return result;
+}
 
     async function uploadToSupabase(file) {
       const fileName = makeSafeFileName(file.name);
