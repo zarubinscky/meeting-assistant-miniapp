@@ -375,6 +375,9 @@ function setButtonLoading(buttonId, loadingText, isLoading) {
       document.getElementById("sendButton").disabled = false;
     }
 
+    async function preflightInitialCheck(file) {
+    }
+
     async function uploadToSupabase(file) {
       const fileName = makeSafeFileName(file.name);
       const uploadUrl = `${SUPABASE_URL}/storage/v1/object/meetings/${fileName}`;
@@ -438,6 +441,8 @@ function setButtonLoading(buttonId, loadingText, isLoading) {
           return;
         }
 
+        await preflightInitialCheck(file);
+        
         isProcessing = true;
         setLoading(true);
 
