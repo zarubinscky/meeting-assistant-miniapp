@@ -260,21 +260,13 @@
     }
 
     const MAX_FILE_SIZE_MB = 1024;
-
     let isProcessing = false;
-
     const tg = window.Telegram?.WebApp;
-
     if (tg) {
       tg.ready();
       tg.expand();
     }
-
-    function getTelegramChatId() {
-      const telegramUserId = tg?.initDataUnsafe?.user?.id;
-      return telegramUserId ? String(telegramUserId) : FALLBACK_TELEGRAM_CHAT_ID;
-
-    }
+    
     function setStatus(text, autoClear = false) {
   const status = document.getElementById("status");
   status.innerText = text || "";
@@ -463,6 +455,7 @@ function setButtonLoading(buttonId, loadingText, isLoading) {
 
     async function sendFile() {
       if (isProcessing) return;
+      isProcessing = true;
 
       try {
         const fileInput = document.getElementById("fileInput");
