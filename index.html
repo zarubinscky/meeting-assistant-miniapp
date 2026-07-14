@@ -473,11 +473,12 @@ function setButtonLoading(buttonId, loadingText, isLoading) {
           return;
         }
 
-        await preflightInitialCheck(file);
-        
         isProcessing = true;
+        const button = document.getElementById("sendButton");
+        button.disabled = true;
+        
+        await preflightInitialCheck(file);
         setLoading(true);
-
         setStatus("⏳ Загружаем файл...\nПожалуйста, не закрывайте окно.");
 
         const fileUrl = await uploadToSupabase(file);
@@ -495,16 +496,23 @@ function setButtonLoading(buttonId, loadingText, isLoading) {
         fileInput.value = "";
         setFileState("Файл отправлен на обработку");
 
-        const button = document.getElementById("sendButton");
         button.disabled = true;
         button.innerText = "✅ Отправлено";
 
-      } catch (error) {
-        console.error(error);
-        isProcessing = false;
-        setLoading(false);
-        setStatus("Ошибка: " + error.message);
-      }
+       } catch (error) {
+       console.error(error);
+       isProcessing = false;
+       setLoading(false);
+       button.disabled = false;
+       button.innerText = "🚀 Отправить на обработку";
+
+       const message =
+         error instanceof Error
+          ? error.message
+          : "Не удалось отправить файл. Попробуйте ещё раз.";
+
+        setStatus("⚠️ " + message);
+        }
     }
 
     const dropzone = document.getElementById("dropzone");
