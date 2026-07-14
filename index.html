@@ -462,6 +462,7 @@ function setButtonLoading(buttonId, loadingText, isLoading) {
         const file = fileInput.files[0];
 
         if (!file) {
+          isProcessing = false;
           setFileState("Файл не загружен");
           return;
         }
@@ -469,11 +470,11 @@ function setButtonLoading(buttonId, loadingText, isLoading) {
         const fileSizeMb = file.size / 1024 / 1024;
 
         if (fileSizeMb > MAX_FILE_SIZE_MB) {
+          isProcessing = false;
           setFileState(`Файл слишком большой: ${fileSizeMb.toFixed(1)} МБ\nМаксимум: ${MAX_FILE_SIZE_MB} МБ`);
           return;
         }
 
-        isProcessing = true;
         const button = document.getElementById("sendButton");
         button.disabled = true;
         
