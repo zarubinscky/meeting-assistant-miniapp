@@ -188,34 +188,8 @@
     background: #E5E7EB;
 }
 
-.upload-progress {
-  margin-top: 12px;
-  padding: 10px 14px;
-  border-radius: 14px;
-  background: #f3f4f6;
-  color: #344054;
-}
-
 .upload-progress[hidden] {
   display: none;
-}
-
-.upload-progress-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  font-size: 14px;
-  font-weight: 600;
-  line-height: 18px;
-}
-
-.upload-progress-track {
-  height: 6px;
-  margin-top: 7px;
-  overflow: hidden;
-  border-radius: 999px;
-  background: #dfe3e8;
 }
 
 .upload-progress-bar {
@@ -226,11 +200,29 @@
   transition: width 160ms linear;
 }
 
+.upload-progress {
+  margin-top: 12px;
+  padding: 10px 14px 9px;
+  border-radius: 14px;
+  background: #f3f4f6;
+  color: #344054;
+}
+
+.upload-progress-track {
+  height: 6px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #dfe3e8;
+}
+
 .upload-progress-details {
-  margin-top: 5px;
+  margin-top: 7px;
   font-size: 12px;
   line-height: 15px;
   color: #7a8394;
+  text-align: center;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
 }
 
   </style>
@@ -269,19 +261,14 @@
       🚀 Отправить на обработку
       </button>
 
-      <div id="uploadProgress" class="upload-progress" hidden>
-        <div class="upload-progress-row">
-          <span id="uploadProgressText">Загружаем файл</span>
-          <span id="uploadProgressPercent">0%</span>
-     </div>
-
-     <div class="upload-progress-track">
+     <div id="uploadProgress" class="upload-progress" hidden>
+       <div class="upload-progress-track">
        <div id="uploadProgressBar" class="upload-progress-bar"></div>
      </div>
 
-     <div id="uploadProgressDetails" class="upload-progress-details">
-        0 МБ из 0 МБ
-     </div>
+      <div id="uploadProgressDetails" class="upload-progress-details">
+         0% • 0 КБ / 0 КБ
+         </div>
      </div>
 
      <div id="status" class="status"></div>
@@ -390,24 +377,27 @@ function setButtonLoading(buttonId, loadingText, isLoading) {
       }
     }
 
-    function showUploadProgress() {
-      document.getElementById("uploadProgress").hidden = false;
+    function showUploadProgress(totalBytes = 0) {
+  document.getElementById("uploadProgress").hidden = false;
+  document.getElementById("uploadProgressBar").style.width = "0%";
 
-      document.getElementById("uploadProgressBar").style.width = "0%";
-      document.getElementById("uploadProgressPercent").innerText = "0%";
-      document.getElementById("uploadProgressDetails").innerText = "0 КБ из 0 КБ";
-    }
+  document.getElementById("uploadProgressDetails").innerText =
+    `0% • 0 КБ / ${formatFileSize(totalBytes)}`;
+}
 
-    function updateUploadProgress(loaded, total) {
-      if (!total) return;
+function updateUploadProgress(loaded, total) {
+  if (!total) return;
 
-     const percent = Math.round((loaded / total) * 100);
+  const percent = Math.min(
+    100,
+    Math.round((loaded / total) * 100)
+  );
 
-      document.getElementById("uploadProgressBar").style.width = percent + "%";
-      document.getElementById("uploadProgressPercent").innerText = percent + "%";
-      document.getElementById("uploadProgressDetails").innerText =
-          `${formatFileSize(loaded)} из ${formatFileSize(total)}`;
-    }
+  document.getElementById("uploadProgressBar").style.width =
+    percent + "%";
+  document.getElementById("uploadProgressDetails").innerText =
+    `${percent}% • ${formatFileSize(loaded)} / ${formatFileSize(total)}`;
+}
 
     function hideUploadProgress() {
        document.getElementById("uploadProgress").hidden = true;
@@ -498,7 +488,7 @@ function setButtonLoading(buttonId, loadingText, isLoading) {
   const fileName = makeSafeFileName(file.name);
   const uploadUrl = `${SUPABASE_URL}/storage/v1/object/meetings/${fileName}`;
 
-  showUploadProgress();
+  showUploadProgress(file.size);
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
 
@@ -601,10 +591,15 @@ function setButtonLoading(buttonId, loadingText, isLoading) {
 
     const fileUrl = await uploadToSupabase(file);
 
-    setStatus(
-      "✅ Файл загружен.\n" +
-      "Запускаем обработку..."
-    );
+    updateUploadProgress(file.size, file.size);
+
+// Ненадолго показываем завершённые 100%
+   await new Promise(resolve => setTimeout(resolve, 250));
+
+   hideUploadProgress();
+   setStatus(
+    "✅ Файл загружен.\nЗапускаем обработку..."
+   );
 
     await startProcessing(fileUrl);
 
@@ -624,6 +619,7 @@ function setButtonLoading(buttonId, loadingText, isLoading) {
     console.error(error);
 
     isProcessing = false;
+    hideUploadProgress();
     setLoading(false);
 
     button.disabled = false;
