@@ -188,6 +188,51 @@
     background: #E5E7EB;
 }
 
+.upload-progress {
+  margin-top: 12px;
+  padding: 10px 14px;
+  border-radius: 14px;
+  background: #f3f4f6;
+  color: #344054;
+}
+
+.upload-progress[hidden] {
+  display: none;
+}
+
+.upload-progress-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 18px;
+}
+
+.upload-progress-track {
+  height: 6px;
+  margin-top: 7px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #dfe3e8;
+}
+
+.upload-progress-bar {
+  width: 0%;
+  height: 100%;
+  border-radius: inherit;
+  background: #0f172a;
+  transition: width 160ms linear;
+}
+
+.upload-progress-details {
+  margin-top: 5px;
+  font-size: 12px;
+  line-height: 15px;
+  color: #7a8394;
+}
+
   </style>
 </head>
 
@@ -221,10 +266,25 @@
       <div id="fileState" class="file-state">Файл не загружен</div>
 
       <button id="sendButton" class="primary-button" onclick="sendFile()" disabled>
-        🚀 Отправить на обработку
+      🚀 Отправить на обработку
       </button>
 
-      <div id="status" class="status"></div>
+      <div id="uploadProgress" class="upload-progress" hidden>
+        <div class="upload-progress-row">
+          <span id="uploadProgressText">Загружаем файл</span>
+          <span id="uploadProgressPercent">0%</span>
+     </div>
+
+     <div class="upload-progress-track">
+       <div id="uploadProgressBar" class="upload-progress-bar"></div>
+     </div>
+
+     <div id="uploadProgressDetails" class="upload-progress-details">
+        0 МБ из 0 МБ
+     </div>
+     </div>
+
+     <div id="status" class="status"></div>
 
       <div class="menu">
         <button id="balanceBtn" class="menu-button" type="button"> 📊 Баланс
