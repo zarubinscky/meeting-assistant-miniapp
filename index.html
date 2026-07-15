@@ -344,10 +344,12 @@ function setButtonLoading(buttonId, loadingText, isLoading) {
       const extension = getExtension(originalName);
       return `meeting-${Date.now()}.${extension}`;
     }
-
+    
     function formatFileSize(bytes) {
-      const mb = bytes / 1024 / 1024;
-      return `${mb.toFixed(1)} МБ`;
+      if (bytes < 1024 * 1024) {
+    return `${Math.max(1, Math.round(bytes / 1024))} КБ`;
+    }
+    return `${(bytes / 1024 / 1024).toFixed(1)} МБ`;
     }
 
     function handleFileSelected() {
@@ -453,68 +455,83 @@ function setButtonLoading(buttonId, loadingText, isLoading) {
       }
     }
 
-    async function sendFile() {
-      if (isProcessing) return;
-      isProcessing = true;
+  async function sendFile() {
+  if (isProcessing) return;
 
-      try {
-        const fileInput = document.getElementById("fileInput");
-        const file = fileInput.files[0];
+  const fileInput = document.getElementById("fileInput");
+  const button = document.getElementById("sendButton");
+  const file = fileInput.files[0];
 
-        if (!file) {
-          isProcessing = false;
-          setFileState("Файл не загружен");
-          return;
-        }
+  // Сначала выполняем локальные проверки.
+  // Флаг обработки ещё не включаем.
+  if (!file) {
+    setFileState("Файл не загружен");
+    button.disabled = true;
+    return;
+  }
 
-        const fileSizeMb = file.size / 1024 / 1024;
+  const fileSizeMb = file.size / 1024 / 1024;
 
-        if (fileSizeMb > MAX_FILE_SIZE_MB) {
-          isProcessing = false;
-          setFileState(`Файл слишком большой: ${fileSizeMb.toFixed(1)} МБ\nМаксимум: ${MAX_FILE_SIZE_MB} МБ`);
-          return;
-        }
+  if (fileSizeMb > MAX_FILE_SIZE_MB) {
+    setFileState(
+      `Файл слишком большой: ${fileSizeMb.toFixed(1)} МБ\n` +
+      `Максимум: ${MAX_FILE_SIZE_MB} МБ`
+    );
+    button.disabled = true;
+    return;
+  }
 
-        const button = document.getElementById("sendButton");
-        button.disabled = true;
-        
-        await preflightInitialCheck(file);
-        setLoading(true);
-        setStatus("⏳ Загружаем файл...\nПожалуйста, не закрывайте окно.");
+  // Блокируем повторный запуск только после локальных проверок.
+  isProcessing = true;
+  button.disabled = true;
 
-        const fileUrl = await uploadToSupabase(file);
+  try {
+    await preflightInitialCheck(file);
 
-        setStatus("✅ Файл загружен.\nЗапускаем обработку...");
+    setLoading(true);
+    setStatus(
+      "⏳ Загружаем файл...\n" +
+      "Пожалуйста, не закрывайте окно."
+    );
 
-        await startProcessing(fileUrl);
+    const fileUrl = await uploadToSupabase(file);
 
-        setStatus(
-          "✅ Отчет отправлен в бот.\n\n" +
-          "Обычно обработка занимает 1–5 минут.",
-          true
-        );
+    setStatus(
+      "✅ Файл загружен.\n" +
+      "Запускаем обработку..."
+    );
 
-        fileInput.value = "";
-        setFileState("Файл отправлен на обработку");
+    await startProcessing(fileUrl);
 
-        button.disabled = true;
-        button.innerText = "✅ Отправлено";
+    setStatus(
+      "✅ Отчет отправлен в бот.\n\n" +
+      "Обычно обработка занимает 1–5 минут.",
+      true
+    );
 
-       } catch (error) {
-       console.error(error);
-       isProcessing = false;
-       setLoading(false);
-       button.disabled = false;
-       button.innerText = "🚀 Отправить на обработку";
+    fileInput.value = "";
+    setFileState("Файл отправлен на обработку");
 
-       const message =
-         error instanceof Error
-          ? error.message
-          : "Не удалось отправить файл. Попробуйте ещё раз.";
+    button.disabled = true;
+    button.innerText = "✅ Отправлено";
 
-        setStatus("⚠️ " + message);
-        }
-    }
+  } catch (error) {
+    console.error(error);
+
+    isProcessing = false;
+    setLoading(false);
+
+    button.disabled = false;
+    button.innerText = "🚀 Отправить на обработку";
+
+    const message =
+      error instanceof Error
+        ? error.message
+        : "Не удалось отправить файл. Попробуйте ещё раз.";
+
+    setStatus(`⚠️ ${message}`);
+  }
+}
 
     const dropzone = document.getElementById("dropzone");
     const fileInput = document.getElementById("fileInput");
