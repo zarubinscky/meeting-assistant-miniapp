@@ -390,6 +390,29 @@ function setButtonLoading(buttonId, loadingText, isLoading) {
       }
     }
 
+    function showUploadProgress() {
+      document.getElementById("uploadProgress").hidden = false;
+
+      document.getElementById("uploadProgressBar").style.width = "0%";
+      document.getElementById("uploadProgressPercent").innerText = "0%";
+      document.getElementById("uploadProgressDetails").innerText = "0 КБ из 0 КБ";
+    }
+
+    function updateUploadProgress(loaded, total) {
+      if (!total) return;
+
+     const percent = Math.round((loaded / total) * 100);
+
+      document.getElementById("uploadProgressBar").style.width = percent + "%";
+      document.getElementById("uploadProgressPercent").innerText = percent + "%";
+      document.getElementById("uploadProgressDetails").innerText =
+          `${formatFileSize(loaded)} из ${formatFileSize(total)}`;
+    }
+
+    function hideUploadProgress() {
+       document.getElementById("uploadProgress").hidden = true;
+    }
+
     function openFileDialog() {
       if (isProcessing) return;
       document.getElementById("fileInput").click();
