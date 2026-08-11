@@ -264,7 +264,7 @@
     .benefit-row { display:flex; align-items:center; gap:9px; min-width:0; }
     .benefit-icon { width:18px; height:18px; stroke-width:1.7; }
     .benefit-icon.intelligence { color:#6d4aff; }
-    .benefit-icon.action { color:#279451; }
+    .benefit-icon.action { color:#6d4aff; }
     .benefit-icon.output { color:#7c5cff; }
     .format-note { margin-top: 6px; font-size: 12px; line-height: 1.3; }
     .dropzone { padding-top: 14px; padding-bottom: 14px; }
@@ -277,6 +277,34 @@
 
     /* IMPORTANT: uploadProgress/status area is intentionally NOT compacted.
        It remains the stable reserved system-message area below the CTA. */
+
+  
+    .menu-button {
+      display: grid;
+      grid-template-columns: 24px auto;
+      align-items: center;
+      justify-content: center;
+      column-gap: 9px;
+      text-align: left;
+    }
+    .menu-button .menu-icon {
+      width: 20px;
+      height: 20px;
+      justify-self: center;
+    }
+    .menu-button span {
+      min-width: 0;
+    }
+
+  
+    .file-state .state-line, .status .state-line {
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+    .state-icon { width:18px; height:18px; color:#6d4aff; }
+    .spin { animation: mm-spin .9s linear infinite; }
+    @keyframes mm-spin { to { transform: rotate(360deg); } }
 
   </style>
 </head>
@@ -349,6 +377,12 @@
   </div>
 
   <script>
+
+
+    const MM_FILE_ICON = `<svg class="icon state-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/></svg>`;
+    const MM_CHECK_ICON = `<svg class="icon state-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12 2.5 2.5L16 9"/></svg>`;
+    const MM_ALERT_ICON = `<svg class="icon state-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M10.3 2.9 1.8 17a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 2.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4M12 17h.01"/></svg>`;
+    const MM_LOADER_ICON = `<svg class="icon state-icon spin" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a9 9 0 1 1-6.2-8.6"/></svg>`;
 
     const CREATE_REPORT_BUTTON_HTML = `<svg class="icon button-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 16.5c-1.5 1.3-2 5-2 5s3.7-.5 5-2c.8-.9.8-2.3-.1-3.1a2.2 2.2 0 0 0-2.9.1Z"/><path d="m9 15-3-3s3.5-6.5 8-8.5c2.6-1.2 6.5-1 6.5-1s.2 3.9-1 6.5c-2 4.5-8.5 8-8.5 8l-2-2Z"/><circle cx="15" cy="8" r="1.5"/></svg><span>Создать отчёт</span>`;
 
@@ -430,7 +464,7 @@ function setButtonLoading(buttonId, loadingText, isLoading) {
 
       if (isLoading) {
         button.disabled = true;
-        button.innerText = "⏳ Отправляем...";
+        button.innerText = " Отправляем...";
       } else {
         const hasFile = !!document.getElementById("fileInput").files[0];
         button.disabled = !hasFile;
@@ -505,7 +539,7 @@ function updateUploadProgress(loaded, total) {
         return;
       }
 
-      setFileState(`📄 ${file.name}\nРазмер: ${formatFileSize(file.size)}`, true);
+      setFileState(` ${file.name}\nРазмер: ${formatFileSize(file.size)}`, true);
       setStatus("");
       document.getElementById("sendButton").disabled = false;
     }
@@ -646,7 +680,7 @@ function updateUploadProgress(loaded, total) {
 
     setLoading(true);
     setStatus(
-      "⏳ Загружаем файл...\n" +
+      " Загружаем файл...\n" +
       "Пожалуйста, не закрывайте окно."
     );
 
@@ -659,13 +693,13 @@ function updateUploadProgress(loaded, total) {
 
    hideUploadProgress();
    setStatus(
-    "✅ Файл загружен.\nЗапускаем обработку..."
+    " Файл загружен.\nЗапускаем обработку..."
    );
 
     await startProcessing(fileUrl);
 
     setStatus(
-      "✅ Отчет отправлен в бот.\n\n" +
+      " Отчет отправлен в бот.\n\n" +
       "Обычно обработка занимает 1–5 минут.",
       true
     );
@@ -674,7 +708,7 @@ function updateUploadProgress(loaded, total) {
     setFileState("Файл отправлен на обработку");
 
     button.disabled = true;
-    button.innerText = "✅ Отправлено";
+    button.innerText = " Отправлено";
 
   } catch (error) {
     console.error(error);
@@ -691,7 +725,7 @@ function updateUploadProgress(loaded, total) {
         ? error.message
         : "Не удалось отправить файл. Попробуйте ещё раз.";
 
-    setStatus(`⚠️ ${message}`);
+    setStatus(` ${message}`);
   }
 }
 
@@ -730,7 +764,7 @@ function updateUploadProgress(loaded, total) {
     });
     
 document.getElementById("balanceBtn").addEventListener("click", async () => {
-  setButtonLoading("balanceBtn", "⏳ Отправляем...", true);
+  setButtonLoading("balanceBtn", " Отправляем...", true);
   try {
 
     const response = await fetch(
@@ -748,9 +782,9 @@ document.getElementById("balanceBtn").addEventListener("click", async () => {
     if (!response.ok) {
       throw new Error("Ошибка получения баланса");
     }
-    setStatus("✅ Баланс отправлен в бот.", true);
+    setStatus(" Баланс отправлен в бот.", true);
   } catch (error) {
-    setStatus("❌ Не удалось получить баланс.", true);
+    setStatus(" Не удалось получить баланс.", true);
     console.error(error);
   } finally {
     setButtonLoading("balanceBtn", "", false);
@@ -758,14 +792,14 @@ document.getElementById("balanceBtn").addEventListener("click", async () => {
   });
     
 document.getElementById("topupBtn").addEventListener("click", async () => {
- setButtonLoading("topupBtn", "⏳ Отправляем...", true);
+ setButtonLoading("topupBtn", " Отправляем...", true);
   try {
-    setStatus("💎 Список тарифов отправлен в бот.", true);
+    setStatus(" Список тарифов отправлен в бот.", true);
     tg.openTelegramLink(
       "https://t.me/meetmind_app_bot?start=pricing"
     );
   } catch (error) {
-    setStatus("❌ Не удалось открыть оплату.", true);
+    setStatus(" Не удалось открыть оплату.", true);
     console.error(error);
   } finally {
     setButtonLoading("topupBtn", "", false);
@@ -773,14 +807,14 @@ document.getElementById("topupBtn").addEventListener("click", async () => {
 
 });
 document.getElementById("aboutBtn").addEventListener("click", () => {
-  setStatus("❓ Инструкция отправлена в Telegram.", true);
+  setStatus(" Инструкция отправлена в Telegram.", true);
   tg.openTelegramLink(
     "https://t.me/meetmind_app_bot?start=about"
   );
   
 });
 document.getElementById("supportBtn").addEventListener("click", () => {
-  setStatus("☎️ Информация о поддержке отправлена в бот.", true);
+  setStatus(" Информация о поддержке отправлена в бот.", true);
   tg.openTelegramLink(
     "https://t.me/meetmind_app_bot?start=help"
   );
