@@ -479,17 +479,14 @@
 async function testMiniappStateAuth() {
   try {
     if (!tg) {
-      console.error("TEST: Telegram WebApp is unavailable");
+      alert("TEST FAIL\nTelegram WebApp unavailable");
       return;
     }
 
     if (!tg.initData) {
-      console.error("TEST: Telegram initData is empty");
+      alert("TEST FAIL\ninitData is empty");
       return;
     }
-
-    console.log("TEST: initData exists =", Boolean(tg.initData));
-    console.log("TEST: initData length =", tg.initData.length);
 
     const response = await fetch(
       `${SUPABASE_URL}/functions/v1/preflight`,
@@ -509,11 +506,17 @@ async function testMiniappStateAuth() {
 
     const result = await response.json();
 
-    console.log("TEST: HTTP status =", response.status);
-    console.log("TEST: miniapp_state =", result);
+    alert(
+      `HTTP: ${response.status}\n` +
+      `OK: ${result.ok}\n` +
+      `Code: ${result.code || "-"}\n` +
+      `Plan: ${result.user?.plan || "-"}\n` +
+      `Language: ${result.user?.language || "-"}\n` +
+      `Available: ${result.balance?.available_minutes ?? "-"}`
+    );
 
   } catch (error) {
-    console.error("TEST: miniapp_state failed", error);
+    alert(`TEST ERROR\n${error.message}`);
   }
 }
 
