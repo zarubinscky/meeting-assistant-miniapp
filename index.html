@@ -474,6 +474,51 @@
       tg.ready();
       tg.expand();
     }
+
+    // TEMP TEST — remove after miniapp_state auth test
+async function testMiniappStateAuth() {
+  try {
+    if (!tg) {
+      console.error("TEST: Telegram WebApp is unavailable");
+      return;
+    }
+
+    if (!tg.initData) {
+      console.error("TEST: Telegram initData is empty");
+      return;
+    }
+
+    console.log("TEST: initData exists =", Boolean(tg.initData));
+    console.log("TEST: initData length =", tg.initData.length);
+
+    const response = await fetch(
+      `${SUPABASE_URL}/functions/v1/preflight`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "apikey": SUPABASE_KEY,
+          "Authorization": `Bearer ${SUPABASE_KEY}`
+        },
+        body: JSON.stringify({
+          mode: "miniapp_state",
+          init_data: tg.initData
+        })
+      }
+    );
+
+    const result = await response.json();
+
+    console.log("TEST: HTTP status =", response.status);
+    console.log("TEST: miniapp_state =", result);
+
+  } catch (error) {
+    console.error("TEST: miniapp_state failed", error);
+  }
+}
+
+testMiniappStateAuth();
+// END TEMP TEST
     
     function setStatus(text, autoClear = false, type = "info") {
       const status = document.getElementById("status");
