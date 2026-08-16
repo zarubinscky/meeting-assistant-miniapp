@@ -374,24 +374,24 @@
     <div class="card">
       <div class="brand">
         <h1 class="brand-title"><svg class="icon brand-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9.5 4A2.5 2.5 0 0 0 7 6.5v.3A3 3 0 0 0 5 12a3 3 0 0 0 2 5.2v.3A2.5 2.5 0 0 0 9.5 20c.8 0 1.5-.4 2-1V5c-.5-.6-1.2-1-2-1Z"/><path d="M14.5 4A2.5 2.5 0 0 1 17 6.5v.3A3 3 0 0 1 19 12a3 3 0 0 1-2 5.2v.3a2.5 2.5 0 0 1-4.5 1.5V5c.5-.6 1.2-1 2-1Z"/><path d="M7 9.5h2.5M14.5 9.5H17M7 14.5h2.5M14.5 14.5H17"/></svg><span>MeetMind AI</span></h1>
-        <p class="subtitle">
+        <p id="subtitle" class="subtitle">
           Превращает встречи, аудио и видео в ясные решения и задачи.
         </p>
       </div>
 
       <div class="value">
-        <div class="value-title">После обработки вы получите:</div>
+        <div id="valueTitle" class="value-title">После обработки вы получите:</div>
         <div class="value-list">
-          <div class="benefit-row"><svg class="icon benefit-icon intelligence" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3-1.3 3.7L7 8l3.7 1.3L12 13l1.3-3.7L17 8l-3.7-1.3L12 3Z"/><path d="m5 14-.8 2.2L2 17l2.2.8L5 20l.8-2.2L8 17l-2.2-.8L5 14Z"/><path d="m19 13-1 2.8-2.8 1L18 18l1 2.8 1-2.8 2.8-1-2.8-1L19 13Z"/></svg><span>Резюме, решения и инсайты</span></div>
-          <div class="benefit-row"><svg class="icon benefit-icon action" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11"/><path d="m3 6 1 1 2-2M3 12l1 1 2-2M3 18l1 1 2-2"/></svg><span>Задачи, риски и ответственных</span></div>
-          <div class="benefit-row"><svg class="icon benefit-icon output" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M8 17v-3M12 17v-6M16 17v-2"/></svg><span>Веб-отчёт и управленческий слайд</span></div>
+          <div class="benefit-row"><svg class="icon benefit-icon intelligence" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3-1.3 3.7L7 8l3.7 1.3L12 13l1.3-3.7L17 8l-3.7-1.3L12 3Z"/><path d="m5 14-.8 2.2L2 17l2.2.8L5 20l.8-2.2L8 17l-2.2-.8L5 14Z"/><path d="m19 13-1 2.8-2.8 1L18 18l1 2.8 1-2.8 2.8-1-2.8-1L19 13Z"/></svg><span id="benefit1">Резюме, решения и инсайты</span></div>
+          <div class="benefit-row"><svg class="icon benefit-icon action" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11"/><path d="m3 6 1 1 2-2M3 12l1 1 2-2M3 18l1 1 2-2"/></svg><span id="benefit2">Задачи, риски и ответственных</span></div>
+          <div class="benefit-row"><svg class="icon benefit-icon output" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M8 17v-3M12 17v-6M16 17v-2"/></svg><span id="benefit3">Веб-отчёт и управленческий слайд</span></div>
         </div>
-        <div class="format-note">Поддерживается большинство аудио- и видеоформатов · до 1 ГБ</div>
+        <div id="formatNote" class="format-note">Поддерживается большинство аудио- и видеоформатов · до 1 ГБ</div>
       </div>
 
       <div id="dropzone" class="dropzone" onclick="openFileDialog()">
-        <div class="drop-title"><svg class="icon ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5M12 3v12"/></svg><span>Загрузите аудио или видео</span></div>
-        <div class="drop-subtitle">Запись встречи, интервью, звонка или другого материала</div>
+        <div class="drop-title"><svg class="icon ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5M12 3v12"/></svg><span id="dropTitleText">Загрузите аудио или видео</span></div>
+        <div id="dropSubtitle" class="drop-subtitle">Запись встречи, интервью, звонка или другого материала</div>
       </div>
 
       <input
@@ -404,7 +404,7 @@
       <div id="fileState" class="file-state">Файл не загружен</div>
 
       <button id="sendButton" class="primary-button" onclick="sendFile()" disabled>
-      <svg class="icon button-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 16.5c-1.5 1.3-2 5-2 5s3.7-.5 5-2c.8-.9.8-2.3-.1-3.1a2.2 2.2 0 0 0-2.9.1Z"/><path d="m9 15-3-3s3.5-6.5 8-8.5c2.6-1.2 6.5-1 6.5-1s.2 3.9-1 6.5c-2 4.5-8.5 8-8.5 8l-2-2Z"/><circle cx="15" cy="8" r="1.5"/></svg><span>Создать отчёт</span>
+      <svg class="icon button-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 16.5c-1.5 1.3-2 5-2 5s3.7-.5 5-2c.8-.9.8-2.3-.1-3.1a2.2 2.2 0 0 0-2.9.1Z"/><path d="m9 15-3-3s3.5-6.5 8-8.5c2.6-1.2 6.5-1 6.5-1s.2 3.9-1 6.5c-2 4.5-8.5 8-8.5 8l-2-2Z"/><circle cx="15" cy="8" r="1.5"/></svg><span id="sendButtonText">Создать отчёт</span>
       </button>
 
      <div id="uploadProgress" class="upload-progress" hidden>
@@ -420,25 +420,23 @@
      <div id="status" class="status"></div>
 
       <div class="menu">
-        <button id="balanceBtn" class="menu-button" type="button"> <svg class="icon menu-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3v18h18"/><path d="M7 16v-4M12 16V8M17 16V5"/></svg><span>Баланс</span>
+        <button id="balanceBtn" class="menu-button" type="button"> <svg class="icon menu-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3v18h18"/><path d="M7 16v-4M12 16V8M17 16V5"/></svg><span id="balanceBtnText">Баланс</span>
         </button>
-        <button id="topupBtn" class="menu-button" type="button"> <svg class="icon menu-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12l4 6-10 12L2 9l4-6Z"/><path d="m2 9 10 3 10-3M12 21l3-12-3-6-3 6 3 12Z"/></svg><span>Пополнить</span>
+        <button id="topupBtn" class="menu-button" type="button"> <svg class="icon menu-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12l4 6-10 12L2 9l4-6Z"/><path d="m2 9 10 3 10-3M12 21l3-12-3-6-3 6 3 12Z"/></svg><span id="topupBtnText">Пополнить</span>
         </button>
-        <button id="aboutBtn" class="menu-button" type="button"> <svg class="icon menu-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 1 1 5.8 1c0 2-3 2-3 4M12 18h.01"/></svg><span>Как это работает</span>
+        <button id="aboutBtn" class="menu-button" type="button"> <svg class="icon menu-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 1 1 5.8 1c0 2-3 2-3 4M12 18h.01"/></svg><span id="aboutBtnText">Как это работает</span>
         </button>
-        <button id="supportBtn" class="menu-button support" type="button">  <svg class="icon menu-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 2 .7 2.8a2 2 0 0 1-.5 2.1L8 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.8 2.1Z"/></svg><span>Поддержка</span>
+        <button id="supportBtn" class="menu-button support" type="button">  <svg class="icon menu-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 2 .7 2.8a2 2 0 0 1-.5 2.1L8 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.8 2.1Z"/></svg><span id="supportBtnText">Поддержка</span>
         </button>
       </div>
 
-      <div class="footer-hint">
+      <div id="footerHint" class="footer-hint">
         Все результаты и сообщения придут в Telegram-бот. Веб-отчёт будет доступен по ссылке.
       </div>
     </div>
   </div>
 
   <script>
-
-
     const ICONS = {
       file: `<svg class="icon state-icon info" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/></svg>`,
       check: `<svg class="icon state-icon success" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12 2.5 2.5L16 9"/></svg>`,
@@ -448,33 +446,309 @@
       loader: `<svg class="icon state-icon loading spin" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a9 9 0 1 1-6.2-8.6"/></svg>`
     };
 
-    const CREATE_REPORT_BUTTON_HTML = `<svg class="icon button-icon rocket-accent" viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 16.5c-1.5 1.3-2 5-2 5s3.7-.5 5-2c.8-.9.8-2.3-.1-3.1a2.2 2.2 0 0 0-2.9.1Z"/><path d="m9 15-3-3s3.5-6.5 8-8.5c2.6-1.2 6.5-1 6.5-1s.2 3.9-1 6.5c-2 4.5-8.5 8-8.5 8l-2-2Z"/><circle cx="15" cy="8" r="1.5"/></svg><span>Создать отчёт</span>`;
-    const SENDING_BUTTON_HTML = `<span class="state-line">${ICONS.loader}<span>Отправляем...</span></span>`;
-    const SENT_BUTTON_HTML = `<span class="state-line"><svg class="icon state-icon success-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12 2.5 2.5L16 9"/></svg><span>Отправлено</span></span>`;
+    const ROCKET_ICON = `<svg class="icon button-icon rocket-accent" viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 16.5c-1.5 1.3-2 5-2 5s3.7-.5 5-2c.8-.9.8-2.3-.1-3.1a2.2 2.2 0 0 0-2.9.1Z"/><path d="m9 15-3-3s3.5-6.5 8-8.5c2.6-1.2 6.5-1 6.5-1s.2 3.9-1 6.5c-2 4.5-8.5 8-8.5 8l-2-2Z"/><circle cx="15" cy="8" r="1.5"/></svg>`;
+    const SUCCESS_ICON = `<svg class="icon state-icon success-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12 2.5 2.5L16 9"/></svg>`;
 
     const SUPABASE_URL = "https://vaddfiksldaebnzaccks.supabase.co";
-
     const SUPABASE_KEY = "sb_publishable_IS_IDGRqz9igQxh3_T1OzQ_ZnRkolZU";
-
     const N8N_WEBHOOK_URL = "https://zarubinscky.app.n8n.cloud/webhook/113c46f6-165e-461e-8a6b-b37e1a0e735f";
-
-    function getTelegramChatId() {
-    const telegramUserId = tg?.initDataUnsafe?.user?.id;
-
-    if (!telegramUserId) {
-    throw new Error("Откройте MeetMind AI через Telegram.");
-    }
-    return String(telegramUserId);
-    }
-
+    const BALANCE_WEBHOOK_URL = "https://zarubinscky.app.n8n.cloud/webhook/c6d90556-2d10-4efa-b221-2633b962f514";
+    const BOT_USERNAME = "meetmind_app_bot";
     const MAX_FILE_SIZE_MB = 1024;
-    let isProcessing = false;
+    const SUPPORTED_LANGUAGES = ["en", "ru", "es", "pt"];
+
     const tg = window.Telegram?.WebApp;
+    let isProcessing = false;
+    let appLanguage = "en";
+    let miniAppState = null;
+
     if (tg) {
       tg.ready();
       tg.expand();
     }
-    
+
+    const I18N = {
+      en: {
+        subtitle: "Turns meetings, audio and video into clear decisions and tasks.",
+        valueTitle: "After processing, you will receive:",
+        benefit1: "Summary, decisions and insights",
+        benefit2: "Tasks, risks and owners",
+        benefit3: "Web report and executive slide",
+        formatNote: "Most audio and video formats are supported · up to 1 GB",
+        dropTitle: "Upload audio or video",
+        dropSubtitle: "Meeting, interview, call or other recording",
+        noFile: "No file selected",
+        createReport: "Create report",
+        sending: "Sending...",
+        sent: "Sent",
+        balance: "Balance",
+        addMinutes: "Add minutes",
+        choosePlan: "Choose plan",
+        renewSubscription: "Renew plan",
+        about: "How it works",
+        support: "Support",
+        footer: "All results and system messages will arrive in the Telegram bot. The web report will be available via a link.",
+        removeFile: "Remove file",
+        openViaTelegram: "Open MeetMind AI through Telegram.",
+        fileTooLarge: "File is too large: {size} MB\nMaximum: {max} MB",
+        size: "Size",
+        initialCheckFailed: "Unable to check the file.",
+        fileRejected: "The file did not pass validation.",
+        uploadFailed: "File upload failed.",
+        networkUploadFailed: "Network error while uploading the file.",
+        processingStartFailed: "The file was uploaded, but processing could not be started.",
+        uploading: "Uploading file...\nPlease do not close this window.",
+        uploadedStarting: "File uploaded.\nStarting processing...",
+        reportSent: "The report was sent to the Telegram bot.\nProcessing usually takes 1–5 minutes.",
+        sentForProcessing: "File sent for processing",
+        genericSendFailed: "Unable to send the file. Please try again.",
+        sendingShort: "Sending...",
+        balanceSent: "Balance sent to the Telegram bot.",
+        balanceFailed: "Unable to get balance.",
+        commerceSent: "Payment options opened in the Telegram bot.",
+        commerceFailed: "Unable to open payment options.",
+        aboutSent: "Instructions opened in the Telegram bot.",
+        supportSent: "Support information opened in the Telegram bot.",
+        stateFailed: "Unable to load account data. Restart the Mini App.",
+        kb: "KB",
+        mb: "MB"
+      },
+      ru: {
+        subtitle: "Превращает встречи, аудио и видео в ясные решения и задачи.",
+        valueTitle: "После обработки вы получите:",
+        benefit1: "Резюме, решения и инсайты",
+        benefit2: "Задачи, риски и ответственных",
+        benefit3: "Веб-отчёт и управленческий слайд",
+        formatNote: "Поддерживается большинство аудио- и видеоформатов · до 1 ГБ",
+        dropTitle: "Загрузите аудио или видео",
+        dropSubtitle: "Запись встречи, интервью, звонка или другого материала",
+        noFile: "Файл не загружен",
+        createReport: "Создать отчёт",
+        sending: "Отправляем...",
+        sent: "Отправлено",
+        balance: "Баланс",
+        addMinutes: "Пополнить минуты",
+        choosePlan: "Выбрать тариф",
+        renewSubscription: "Продлить тариф",
+        about: "Как это работает",
+        support: "Поддержка",
+        footer: "Все результаты и системные сообщения придут в Telegram-бот. Веб-отчёт будет доступен по ссылке.",
+        removeFile: "Удалить файл",
+        openViaTelegram: "Откройте MeetMind AI через Telegram.",
+        fileTooLarge: "Файл слишком большой: {size} МБ\nМаксимум: {max} МБ",
+        size: "Размер",
+        initialCheckFailed: "Не удалось выполнить проверку файла.",
+        fileRejected: "Файл не прошёл проверку.",
+        uploadFailed: "Ошибка загрузки файла.",
+        networkUploadFailed: "Ошибка сети при загрузке файла.",
+        processingStartFailed: "Файл загружен, но обработку запустить не удалось.",
+        uploading: "Загружаем файл...\nПожалуйста, не закрывайте окно.",
+        uploadedStarting: "Файл загружен.\nЗапускаем обработку...",
+        reportSent: "Отчёт отправлен в Telegram-бот.\nОбычно обработка занимает 1–5 минут.",
+        sentForProcessing: "Файл отправлен на обработку",
+        genericSendFailed: "Не удалось отправить файл. Попробуйте ещё раз.",
+        sendingShort: "Отправляем...",
+        balanceSent: "Баланс отправлен в Telegram-бот.",
+        balanceFailed: "Не удалось получить баланс.",
+        commerceSent: "Варианты оплаты открыты в Telegram-боте.",
+        commerceFailed: "Не удалось открыть оплату.",
+        aboutSent: "Инструкция открыта в Telegram-боте.",
+        supportSent: "Информация о поддержке открыта в Telegram-боте.",
+        stateFailed: "Не удалось загрузить данные аккаунта. Перезапустите Mini App.",
+        kb: "КБ",
+        mb: "МБ"
+      },
+      es: {
+        subtitle: "Convierte reuniones, audio y video en decisiones y tareas claras.",
+        valueTitle: "Después del procesamiento recibirás:",
+        benefit1: "Resumen, decisiones e insights",
+        benefit2: "Tareas, riesgos y responsables",
+        benefit3: "Informe web y diapositiva ejecutiva",
+        formatNote: "Compatible con la mayoría de formatos de audio y video · hasta 1 GB",
+        dropTitle: "Sube audio o video",
+        dropSubtitle: "Grabación de una reunión, entrevista, llamada u otro material",
+        noFile: "Ningún archivo seleccionado",
+        createReport: "Crear informe",
+        sending: "Enviando...",
+        sent: "Enviado",
+        balance: "Saldo",
+        addMinutes: "Añadir minutos",
+        choosePlan: "Elegir plan",
+        renewSubscription: "Renovar plan",
+        about: "Cómo funciona",
+        support: "Soporte",
+        footer: "Todos los resultados y mensajes del sistema llegarán al bot de Telegram. El informe web estará disponible mediante un enlace.",
+        removeFile: "Eliminar archivo",
+        openViaTelegram: "Abre MeetMind AI desde Telegram.",
+        fileTooLarge: "El archivo es demasiado grande: {size} MB\nMáximo: {max} MB",
+        size: "Tamaño",
+        initialCheckFailed: "No se pudo comprobar el archivo.",
+        fileRejected: "El archivo no superó la validación.",
+        uploadFailed: "Error al subir el archivo.",
+        networkUploadFailed: "Error de red al subir el archivo.",
+        processingStartFailed: "El archivo se subió, pero no se pudo iniciar el procesamiento.",
+        uploading: "Subiendo archivo...\nNo cierres esta ventana.",
+        uploadedStarting: "Archivo subido.\nIniciando procesamiento...",
+        reportSent: "El informe se envió al bot de Telegram.\nEl procesamiento suele tardar entre 1 y 5 minutos.",
+        sentForProcessing: "Archivo enviado para procesamiento",
+        genericSendFailed: "No se pudo enviar el archivo. Inténtalo de nuevo.",
+        sendingShort: "Enviando...",
+        balanceSent: "El saldo se envió al bot de Telegram.",
+        balanceFailed: "No se pudo obtener el saldo.",
+        commerceSent: "Las opciones de pago se abrieron en el bot de Telegram.",
+        commerceFailed: "No se pudieron abrir las opciones de pago.",
+        aboutSent: "Las instrucciones se abrieron en el bot de Telegram.",
+        supportSent: "La información de soporte se abrió en el bot de Telegram.",
+        stateFailed: "No se pudieron cargar los datos de la cuenta. Reinicia la Mini App.",
+        kb: "KB",
+        mb: "MB"
+      },
+      pt: {
+        subtitle: "Transforma reuniões, áudio e vídeo em decisões e tarefas claras.",
+        valueTitle: "Após o processamento, você receberá:",
+        benefit1: "Resumo, decisões e insights",
+        benefit2: "Tarefas, riscos e responsáveis",
+        benefit3: "Relatório web e slide executivo",
+        formatNote: "Compatível com a maioria dos formatos de áudio e vídeo · até 1 GB",
+        dropTitle: "Envie áudio ou vídeo",
+        dropSubtitle: "Gravação de reunião, entrevista, chamada ou outro material",
+        noFile: "Nenhum arquivo selecionado",
+        createReport: "Criar relatório",
+        sending: "Enviando...",
+        sent: "Enviado",
+        balance: "Saldo",
+        addMinutes: "Adicionar minutos",
+        choosePlan: "Escolher plano",
+        renewSubscription: "Renovar plano",
+        about: "Como funciona",
+        support: "Suporte",
+        footer: "Todos os resultados e mensagens do sistema chegarão ao bot do Telegram. O relatório web ficará disponível por um link.",
+        removeFile: "Remover arquivo",
+        openViaTelegram: "Abra o MeetMind AI pelo Telegram.",
+        fileTooLarge: "O arquivo é muito grande: {size} MB\nMáximo: {max} MB",
+        size: "Tamanho",
+        initialCheckFailed: "Não foi possível verificar o arquivo.",
+        fileRejected: "O arquivo não passou na validação.",
+        uploadFailed: "Falha ao enviar o arquivo.",
+        networkUploadFailed: "Erro de rede ao enviar o arquivo.",
+        processingStartFailed: "O arquivo foi enviado, mas não foi possível iniciar o processamento.",
+        uploading: "Enviando arquivo...\nNão feche esta janela.",
+        uploadedStarting: "Arquivo enviado.\nIniciando processamento...",
+        reportSent: "O relatório foi enviado ao bot do Telegram.\nO processamento geralmente leva de 1 a 5 minutos.",
+        sentForProcessing: "Arquivo enviado para processamento",
+        genericSendFailed: "Não foi possível enviar o arquivo. Tente novamente.",
+        sendingShort: "Enviando...",
+        balanceSent: "O saldo foi enviado ao bot do Telegram.",
+        balanceFailed: "Não foi possível obter o saldo.",
+        commerceSent: "As opções de pagamento foram abertas no bot do Telegram.",
+        commerceFailed: "Não foi possível abrir as opções de pagamento.",
+        aboutSent: "As instruções foram abertas no bot do Telegram.",
+        supportSent: "As informações de suporte foram abertas no bot do Telegram.",
+        stateFailed: "Não foi possível carregar os dados da conta. Reinicie o Mini App.",
+        kb: "KB",
+        mb: "MB"
+      }
+    };
+
+    function t(key) {
+      return I18N[appLanguage]?.[key] ?? I18N.en[key] ?? key;
+    }
+
+    function interpolate(text, values) {
+      return String(text).replace(/\{(\w+)\}/g, (_, key) =>
+        values[key] !== undefined ? String(values[key]) : `{${key}}`
+      );
+    }
+
+    function getInitData() {
+      const initData = tg?.initData;
+      if (!initData) throw new Error(t("openViaTelegram"));
+      return initData;
+    }
+
+    function getTelegramChatId() {
+      const telegramUserId = tg?.initDataUnsafe?.user?.id;
+      if (!telegramUserId) throw new Error(t("openViaTelegram"));
+      return String(telegramUserId);
+    }
+
+    function createReportButtonHtml() {
+      return `${ROCKET_ICON}<span id="sendButtonText">${t("createReport")}</span>`;
+    }
+
+    function sendingButtonHtml() {
+      return `<span class="state-line">${ICONS.loader}<span>${t("sending")}</span></span>`;
+    }
+
+    function sentButtonHtml() {
+      return `<span class="state-line">${SUCCESS_ICON}<span>${t("sent")}</span></span>`;
+    }
+
+    function commerceButtonLabel(buttonKey) {
+      if (buttonKey === "choose_plan") return t("choosePlan");
+      if (buttonKey === "renew_subscription") return t("renewSubscription");
+      return t("addMinutes");
+    }
+
+    function applyLanguage(language) {
+      appLanguage = SUPPORTED_LANGUAGES.includes(language) ? language : "en";
+      document.documentElement.lang = appLanguage;
+
+      document.getElementById("subtitle").textContent = t("subtitle");
+      document.getElementById("valueTitle").textContent = t("valueTitle");
+      document.getElementById("benefit1").textContent = t("benefit1");
+      document.getElementById("benefit2").textContent = t("benefit2");
+      document.getElementById("benefit3").textContent = t("benefit3");
+      document.getElementById("formatNote").textContent = t("formatNote");
+      document.getElementById("dropTitleText").textContent = t("dropTitle");
+      document.getElementById("dropSubtitle").textContent = t("dropSubtitle");
+      document.getElementById("balanceBtnText").textContent = t("balance");
+      document.getElementById("aboutBtnText").textContent = t("about");
+      document.getElementById("supportBtnText").textContent = t("support");
+      document.getElementById("footerHint").textContent = t("footer");
+
+      const topupLabel = miniAppState?.commerce?.button_key
+        ? commerceButtonLabel(miniAppState.commerce.button_key)
+        : t("addMinutes");
+      document.getElementById("topupBtnText").textContent = topupLabel;
+
+      const selectedFile = document.getElementById("fileInput").files[0];
+      if (!selectedFile && !isProcessing) setFileState(t("noFile"));
+
+      const sendButton = document.getElementById("sendButton");
+      if (!isProcessing && !sendButton.disabled) {
+        sendButton.innerHTML = createReportButtonHtml();
+      } else if (!isProcessing && !selectedFile) {
+        sendButton.innerHTML = createReportButtonHtml();
+      }
+    }
+
+    async function loadMiniAppState() {
+      const response = await fetch(`${SUPABASE_URL}/functions/v1/preflight`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "apikey": SUPABASE_KEY,
+          "Authorization": `Bearer ${SUPABASE_KEY}`
+        },
+        body: JSON.stringify({
+          mode: "miniapp_state",
+          init_data: getInitData()
+        })
+      });
+
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok || !result.ok) {
+        const error = new Error(result.message || t("stateFailed"));
+        error.code = result.code;
+        throw error;
+      }
+
+      miniAppState = result;
+      applyLanguage(result.user?.language);
+      return result;
+    }
+
     function setStatus(text, autoClear = false, type = "info") {
       const status = document.getElementById("status");
       const icon = ICONS[type] || ICONS.info;
@@ -501,83 +775,90 @@
 
     function setButtonLoading(buttonId, loadingText, isLoading) {
       const button = document.getElementById(buttonId);
-
-      // Preserve the complete SVG + label, not only innerText.
-      if (!button.dataset.originalHtml) {
-        button.dataset.originalHtml = button.innerHTML;
-      }
+      if (!button.dataset.originalHtml) button.dataset.originalHtml = button.innerHTML;
 
       if (isLoading) {
         button.disabled = true;
         button.innerHTML =
-          `<span class="button-runtime">${ICONS.loader}<span>${loadingText || "Отправляем..."}</span></span>`;
+          `<span class="button-runtime">${ICONS.loader}<span>${loadingText || t("sendingShort")}</span></span>`;
       } else {
         button.disabled = false;
         button.innerHTML = button.dataset.originalHtml;
+        if (buttonId === "balanceBtn") {
+          document.getElementById("balanceBtnText").textContent = t("balance");
+        }
+        if (buttonId === "topupBtn") {
+          document.getElementById("topupBtnText").textContent =
+            commerceButtonLabel(miniAppState?.commerce?.button_key);
+        }
       }
     }
 
     function setFileState(text, canRemove = false) {
       const fileState = document.getElementById("fileState");
+      const safeText = String(text || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+
       if (canRemove) {
         fileState.innerHTML =
-          '<span class="file-info">' + ICONS.file + '<span>' + text + '</span></span>' +
-          '<button type="button" id="removeFileBtn" class="remove-file-btn" aria-label="Удалить файл">✕</button>';
+          '<span class="file-info">' + ICONS.file + '<span>' + safeText + '</span></span>' +
+          `<button type="button" id="removeFileBtn" class="remove-file-btn" aria-label="${t("removeFile")}">✕</button>`;
         document.getElementById("removeFileBtn").addEventListener("click", clearSelectedFile);
       } else {
-        fileState.innerHTML = text
-          ? `<span class="state-line">${ICONS.file}<span>${text}</span></span>`
+        fileState.innerHTML = safeText
+          ? `<span class="state-line">${ICONS.file}<span>${safeText}</span></span>`
           : "";
       }
     }
 
     function clearSelectedFile() {
-    const fileInput = document.getElementById("fileInput");
-    const button = document.getElementById("sendButton");
-       fileInput.value = "";
-    setFileState("Файл не загружен", false);
-    setStatus("", false);
-    button.disabled = true;
-    button.innerHTML = CREATE_REPORT_BUTTON_HTML;
+      const fileInput = document.getElementById("fileInput");
+      const button = document.getElementById("sendButton");
+      fileInput.value = "";
+      setFileState(t("noFile"), false);
+      setStatus("", false);
+      button.disabled = true;
+      button.innerHTML = createReportButtonHtml();
+    }
 
-  }
     function setLoading(isLoading) {
       const button = document.getElementById("sendButton");
-
       if (isLoading) {
         button.disabled = true;
-        button.innerHTML = SENDING_BUTTON_HTML;
+        button.innerHTML = sendingButtonHtml();
       } else {
         const hasFile = !!document.getElementById("fileInput").files[0];
         button.disabled = !hasFile;
-        button.innerHTML = CREATE_REPORT_BUTTON_HTML;
+        button.innerHTML = createReportButtonHtml();
       }
     }
 
+    function formatFileSize(bytes) {
+      if (bytes < 1024 * 1024) {
+        return `${Math.max(1, Math.round(bytes / 1024))} ${t("kb")}`;
+      }
+      return `${(bytes / 1024 / 1024).toFixed(1)} ${t("mb")}`;
+    }
+
     function showUploadProgress(totalBytes = 0) {
-  document.getElementById("uploadProgress").hidden = false;
-  document.getElementById("uploadProgressBar").style.width = "0%";
+      document.getElementById("uploadProgress").hidden = false;
+      document.getElementById("uploadProgressBar").style.width = "0%";
+      document.getElementById("uploadProgressDetails").innerText =
+        `0% • 0 ${t("kb")} / ${formatFileSize(totalBytes)}`;
+    }
 
-  document.getElementById("uploadProgressDetails").innerText =
-    `0% • 0 КБ / ${formatFileSize(totalBytes)}`;
-}
-
-function updateUploadProgress(loaded, total) {
-  if (!total) return;
-
-  const percent = Math.min(
-    100,
-    Math.round((loaded / total) * 100)
-  );
-
-  document.getElementById("uploadProgressBar").style.width =
-    percent + "%";
-  document.getElementById("uploadProgressDetails").innerText =
-    `${percent}% • ${formatFileSize(loaded)} / ${formatFileSize(total)}`;
-}
+    function updateUploadProgress(loaded, total) {
+      if (!total) return;
+      const percent = Math.min(100, Math.round((loaded / total) * 100));
+      document.getElementById("uploadProgressBar").style.width = percent + "%";
+      document.getElementById("uploadProgressDetails").innerText =
+        `${percent}% • ${formatFileSize(loaded)} / ${formatFileSize(total)}`;
+    }
 
     function hideUploadProgress() {
-       document.getElementById("uploadProgress").hidden = true;
+      document.getElementById("uploadProgress").hidden = true;
     }
 
     function openFileDialog() {
@@ -594,128 +875,100 @@ function updateUploadProgress(loaded, total) {
       const extension = getExtension(originalName);
       return `meeting-${Date.now()}.${extension}`;
     }
-    
-    function formatFileSize(bytes) {
-      if (bytes < 1024 * 1024) {
-    return `${Math.max(1, Math.round(bytes / 1024))} КБ`;
-    }
-    return `${(bytes / 1024 / 1024).toFixed(1)} МБ`;
-    }
 
     function handleFileSelected() {
       if (isProcessing) return;
 
       const file = document.getElementById("fileInput").files[0];
-
       if (!file) {
-        setFileState("Файл не загружен");
+        setFileState(t("noFile"));
         document.getElementById("sendButton").disabled = true;
         return;
       }
 
       const fileSizeMb = file.size / 1024 / 1024;
-
       if (fileSizeMb > MAX_FILE_SIZE_MB) {
-        setFileState(`Файл слишком большой: ${fileSizeMb.toFixed(1)} МБ\nМаксимум: ${MAX_FILE_SIZE_MB} МБ`);
+        setFileState(interpolate(t("fileTooLarge"), {
+          size: fileSizeMb.toFixed(1),
+          max: MAX_FILE_SIZE_MB
+        }));
         document.getElementById("sendButton").disabled = true;
         return;
       }
 
-      setFileState(` ${file.name}\nРазмер: ${formatFileSize(file.size)}`, true);
+      setFileState(`${file.name}\n${t("size")}: ${formatFileSize(file.size)}`, true);
       setStatus("");
-      document.getElementById("sendButton").disabled = false;
+      const button = document.getElementById("sendButton");
+      button.disabled = false;
+      button.innerHTML = createReportButtonHtml();
     }
 
     async function preflightInitialCheck(file) {
-  const chatId = getTelegramChatId();
-  const response = await fetch(
-    `${SUPABASE_URL}/functions/v1/preflight`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "apikey": SUPABASE_KEY,
-        "Authorization": `Bearer ${SUPABASE_KEY}`
-      },
-      body: JSON.stringify({
-        mode: "initial_check",
-        telegram_id: chatId,
-        file_name: file.name,
-        file_size_bytes: file.size,
-        mime_type: file.type
-      })
-    }
-  );
-
-  if (!response.ok) {
-    throw new Error("Не удалось выполнить проверку файла.");
-  }
-
-  const result = await response.json();
-  console.log("Preflight:", result);
-
-  if (!result.allowed) {
-    throw new Error(result.message || "Файл не прошёл проверку.");
-  }
-
-  return result;
-}
-
-   async function uploadToSupabase(file) {
-  const fileName = makeSafeFileName(file.name);
-  const uploadUrl = `${SUPABASE_URL}/storage/v1/object/meetings/${fileName}`;
-
-  showUploadProgress(file.size);
-  return new Promise((resolve, reject) => {
-    const xhr = new XMLHttpRequest();
-
-    xhr.open("POST", uploadUrl);
-
-    xhr.setRequestHeader("apikey", SUPABASE_KEY);
-    xhr.setRequestHeader("Authorization", `Bearer ${SUPABASE_KEY}`);
-    xhr.setRequestHeader(
-      "Content-Type",
-      file.type || "application/octet-stream"
-    );
-
-    xhr.upload.onprogress = (event) => {
-      if (event.lengthComputable) {
-        updateUploadProgress(event.loaded, event.total);
-      }
-    };
-
-    xhr.onload = () => {
-
-      if (xhr.status >= 200 && xhr.status < 300) {
-        updateUploadProgress(file.size, file.size);
-        resolve(
-          `${SUPABASE_URL}/storage/v1/object/public/meetings/${fileName}`
-        );
-
-      } else {
-        console.error(xhr.responseText);
-        reject(new Error("Ошибка загрузки файла в Supabase"));
-      }
-    };
-
-    xhr.onerror = () => {
-      reject(new Error("Ошибка сети при загрузке файла"));
-    };
-
-    xhr.send(file);
-  });
-}
-
-    async function startProcessing(fileUrl) {
-      const chatId = getTelegramChatId();
-
-      const webhookResponse = await fetch(N8N_WEBHOOK_URL, {
+      const response = await fetch(`${SUPABASE_URL}/functions/v1/preflight`, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
+          "apikey": SUPABASE_KEY,
+          "Authorization": `Bearer ${SUPABASE_KEY}`
         },
         body: JSON.stringify({
-          chat_id: chatId,
+          mode: "initial_check",
+          init_data: getInitData(),
+          file_name: file.name,
+          file_size_bytes: file.size,
+          mime_type: file.type
+        })
+      });
+
+      const result = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(result.message || t("initialCheckFailed"));
+      }
+      if (!result.allowed) {
+        throw new Error(result.message || t("fileRejected"));
+      }
+      return result;
+    }
+
+    async function uploadToSupabase(file) {
+      const fileName = makeSafeFileName(file.name);
+      const uploadUrl = `${SUPABASE_URL}/storage/v1/object/meetings/${fileName}`;
+
+      showUploadProgress(file.size);
+
+      return new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST", uploadUrl);
+        xhr.setRequestHeader("apikey", SUPABASE_KEY);
+        xhr.setRequestHeader("Authorization", `Bearer ${SUPABASE_KEY}`);
+        xhr.setRequestHeader("Content-Type", file.type || "application/octet-stream");
+
+        xhr.upload.onprogress = (event) => {
+          if (event.lengthComputable) updateUploadProgress(event.loaded, event.total);
+        };
+
+        xhr.onload = () => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            updateUploadProgress(file.size, file.size);
+            resolve(`${SUPABASE_URL}/storage/v1/object/public/meetings/${fileName}`);
+          } else {
+            console.error(xhr.responseText);
+            reject(new Error(t("uploadFailed")));
+          }
+        };
+
+        xhr.onerror = () => reject(new Error(t("networkUploadFailed")));
+        xhr.send(file);
+      });
+    }
+
+    async function startProcessing(fileUrl) {
+      const webhookResponse = await fetch(N8N_WEBHOOK_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          chat_id: getTelegramChatId(),
           file_url: fileUrl
         })
       });
@@ -723,87 +976,76 @@ function updateUploadProgress(loaded, total) {
       if (!webhookResponse.ok) {
         const errorText = await webhookResponse.text();
         console.error("n8n webhook error:", errorText);
-        throw new Error("Файл загружен, но обработку запустить не удалось");
+        throw new Error(t("processingStartFailed"));
       }
     }
 
-  async function sendFile() {
-  if (isProcessing) return;
+    async function sendFile() {
+      if (isProcessing) return;
 
-  const fileInput = document.getElementById("fileInput");
-  const button = document.getElementById("sendButton");
-  const file = fileInput.files[0];
+      const fileInput = document.getElementById("fileInput");
+      const button = document.getElementById("sendButton");
+      const file = fileInput.files[0];
 
-  // Сначала выполняем локальные проверки.
-  // Флаг обработки ещё не включаем.
-  if (!file) {
-    setFileState("Файл не загружен");
-    button.disabled = true;
-    return;
-  }
+      if (!file) {
+        setFileState(t("noFile"));
+        button.disabled = true;
+        return;
+      }
 
-  const fileSizeMb = file.size / 1024 / 1024;
+      const fileSizeMb = file.size / 1024 / 1024;
+      if (fileSizeMb > MAX_FILE_SIZE_MB) {
+        setFileState(interpolate(t("fileTooLarge"), {
+          size: fileSizeMb.toFixed(1),
+          max: MAX_FILE_SIZE_MB
+        }));
+        button.disabled = true;
+        return;
+      }
 
-  if (fileSizeMb > MAX_FILE_SIZE_MB) {
-    setFileState(
-      `Файл слишком большой: ${fileSizeMb.toFixed(1)} МБ\n` +
-      `Максимум: ${MAX_FILE_SIZE_MB} МБ`
-    );
-    button.disabled = true;
-    return;
-  }
+      isProcessing = true;
+      button.disabled = true;
 
-  // Блокируем повторный запуск только после локальных проверок.
-  isProcessing = true;
-  button.disabled = true;
+      try {
+        await preflightInitialCheck(file);
 
-  try {
-    await preflightInitialCheck(file);
+        setLoading(true);
+        setStatus(t("uploading"), false, "loading");
 
-    setLoading(true);
-    setStatus(
-      " Загружаем файл...\n" +
-      "Пожалуйста, не закрывайте окно."
-    );
+        const fileUrl = await uploadToSupabase(file);
+        updateUploadProgress(file.size, file.size);
 
-    const fileUrl = await uploadToSupabase(file);
+        await new Promise(resolve => setTimeout(resolve, 250));
 
-    updateUploadProgress(file.size, file.size);
+        hideUploadProgress();
+        setStatus(t("uploadedStarting"), false, "loading");
 
-// Ненадолго показываем завершённые 100%
-   await new Promise(resolve => setTimeout(resolve, 250));
+        await startProcessing(fileUrl);
 
-   hideUploadProgress();
-   setStatus("Файл загружен.\nЗапускаем обработку...", false, "loading");
+        setStatus(t("reportSent"), true, "success");
+        fileInput.value = "";
+        setFileState(t("sentForProcessing"));
+        button.disabled = true;
+        button.innerHTML = sentButtonHtml();
 
-    await startProcessing(fileUrl);
+      } catch (error) {
+        console.error(error);
+        isProcessing = false;
+        hideUploadProgress();
+        setLoading(false);
 
-    setStatus("Отчёт отправлен в Telegram-бот.\nОбычно обработка занимает 1–5 минут.", true, "success");
+        button.disabled = false;
+        button.innerHTML = createReportButtonHtml();
 
-    fileInput.value = "";
-    setFileState("Файл отправлен на обработку");
+        const message = error instanceof Error ? error.message : t("genericSendFailed");
+        setStatus(message, false, "error");
+      }
+    }
 
-    button.disabled = true;
-    button.innerHTML = SENT_BUTTON_HTML;
-
-  } catch (error) {
-    console.error(error);
-
-    isProcessing = false;
-    hideUploadProgress();
-    setLoading(false);
-
-    button.disabled = false;
-    button.innerHTML = CREATE_REPORT_BUTTON_HTML;
-
-    const message =
-      error instanceof Error
-        ? error.message
-        : "Не удалось отправить файл. Попробуйте ещё раз.";
-
-    setStatus(message, false, "error");
-  }
-}
+    function openBotStart(parameter) {
+      if (!tg?.openTelegramLink) throw new Error(t("openViaTelegram"));
+      tg.openTelegramLink(`https://t.me/${BOT_USERNAME}?start=${encodeURIComponent(parameter)}`);
+    }
 
     const dropzone = document.getElementById("dropzone");
     const fileInput = document.getElementById("fileInput");
@@ -824,78 +1066,88 @@ function updateUploadProgress(loaded, total) {
       });
     });
 
-    dropzone.addEventListener("drop", (event) => {
-    if (isProcessing) return;
-    event.preventDefault();
-    event.stopPropagation();
-    dropzone.classList.remove("dragover");
-      
-    const dt = new DataTransfer();
-    for (const file of event.dataTransfer.files) {
-        dt.items.add(file);
-    }
-    fileInput.files = dt.files;
-    handleFileSelected();
+    dropzone.addEventListener("drop", event => {
+      if (isProcessing) return;
+      event.preventDefault();
+      event.stopPropagation();
+      dropzone.classList.remove("dragover");
 
+      const dt = new DataTransfer();
+      for (const file of event.dataTransfer.files) dt.items.add(file);
+      fileInput.files = dt.files;
+      handleFileSelected();
     });
-    
-document.getElementById("balanceBtn").addEventListener("click", async () => {
-  setButtonLoading("balanceBtn", "Отправляем...", true);
-  try {
 
-    const response = await fetch(
-      "https://zarubinscky.app.n8n.cloud/webhook/c6d90556-2d10-4efa-b221-2633b962f514",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          telegram_id: getTelegramChatId()
-        })
+    document.getElementById("balanceBtn").addEventListener("click", async () => {
+      setButtonLoading("balanceBtn", t("sendingShort"), true);
+      try {
+        const response = await fetch(BALANCE_WEBHOOK_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ telegram_id: getTelegramChatId() })
+        });
+        if (!response.ok) throw new Error(t("balanceFailed"));
+        setStatus(t("balanceSent"), true, "success");
+      } catch (error) {
+        setStatus(t("balanceFailed"), true, "error");
+        console.error(error);
+      } finally {
+        setButtonLoading("balanceBtn", "", false);
       }
-    );
-    if (!response.ok) {
-      throw new Error("Ошибка получения баланса");
+    });
+
+    document.getElementById("topupBtn").addEventListener("click", async () => {
+      setButtonLoading("topupBtn", t("sendingShort"), true);
+      try {
+        // The backend determines the commercial state and button label.
+        // Telegram/n8n remains responsible for the actual system message / Stars flow.
+        openBotStart("pricing");
+        setStatus(t("commerceSent"), true, "success");
+      } catch (error) {
+        setStatus(t("commerceFailed"), true, "error");
+        console.error(error);
+      } finally {
+        setButtonLoading("topupBtn", "", false);
+      }
+    });
+
+    document.getElementById("aboutBtn").addEventListener("click", () => {
+      try {
+        openBotStart("about");
+        setStatus(t("aboutSent"), true, "success");
+      } catch (error) {
+        console.error(error);
+      }
+    });
+
+    document.getElementById("supportBtn").addEventListener("click", () => {
+      try {
+        openBotStart("help");
+        setStatus(t("supportSent"), true, "success");
+      } catch (error) {
+        console.error(error);
+      }
+    });
+
+    async function initializeMiniApp() {
+      // Security-first: English is the global fallback until authenticated
+      // Telegram initData returns the user's stored interface language.
+      applyLanguage("en");
+      document.getElementById("sendButton").innerHTML = createReportButtonHtml();
+
+      try {
+        await loadMiniAppState();
+      } catch (error) {
+        console.error("Mini App state init failed:", error);
+        setStatus(
+          error instanceof Error ? error.message : t("stateFailed"),
+          false,
+          "error"
+        );
+      }
     }
-    setStatus("Баланс отправлен в Telegram-бот.", true, "success");
-  } catch (error) {
-    setStatus("Не удалось получить баланс.", true, "error");
-    console.error(error);
-  } finally {
-    setButtonLoading("balanceBtn", "", false);
-  }
-  });
-    
-document.getElementById("topupBtn").addEventListener("click", async () => {
- setButtonLoading("topupBtn", "Отправляем...", true);
-  try {
-    setStatus("Список тарифов отправлен в Telegram-бот.", true, "success");
-    tg.openTelegramLink(
-      "https://t.me/meetmind_app_bot?start=pricing"
-    );
-  } catch (error) {
-    setStatus("Не удалось открыть оплату.", true, "error");
-    console.error(error);
-  } finally {
-    setButtonLoading("topupBtn", "", false);
-  };
 
-});
-document.getElementById("aboutBtn").addEventListener("click", () => {
-  setStatus("Инструкция отправлена в Telegram-бот.", true, "success");
-  tg.openTelegramLink(
-    "https://t.me/meetmind_app_bot?start=about"
-  );
-  
-});
-document.getElementById("supportBtn").addEventListener("click", () => {
-  setStatus("Информация о поддержке отправлена в Telegram-бот.", true, "success");
-  tg.openTelegramLink(
-    "https://t.me/meetmind_app_bot?start=help"
-  );
-
-});
+    initializeMiniApp();
   </script>
 </body>
 </html>
