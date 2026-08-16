@@ -473,7 +473,7 @@
         valueTitle: "After processing, you will receive:",
         benefit1: "Summary, decisions and insights",
         benefit2: "Tasks, risks and owners",
-        benefit3: "Web report and executive slide",
+        benefit3: "Web report, executive slide and transcript",
         formatNote: "Most audio and video formats are supported · up to 1 GB",
         dropTitle: "Upload audio or video",
         dropSubtitle: "Meeting, interview, call or other recording",
@@ -493,6 +493,12 @@
         fileTooLarge: "File is too large: {size} MB\nMaximum: {max} MB",
         size: "Size",
         initialCheckFailed: "Unable to check the file.",
+        detectingDuration: "Checking recording duration...",
+        durationDetectionFailed: "Unable to determine the recording duration. Try another file or format.",
+        durationCheckFailed: "Unable to verify the recording duration and available minutes.",
+        fileTooLong: "The recording is longer than the allowed {max} minutes.",
+        zeroBalance: "No processing minutes are available. Add minutes or choose a plan.",
+        insufficientMinutes: "Not enough minutes. Required: {required}; available: {available}.",
         fileRejected: "The file did not pass validation.",
         uploadFailed: "File upload failed.",
         networkUploadFailed: "Network error while uploading the file.",
@@ -518,7 +524,7 @@
         valueTitle: "После обработки вы получите:",
         benefit1: "Резюме, решения и инсайты",
         benefit2: "Задачи, риски и ответственных",
-        benefit3: "Веб-отчёт и управленческий слайд",
+        benefit3: "Веб-отчёт, управленческий слайд и транскрипт",
         formatNote: "Поддерживается большинство аудио- и видеоформатов · до 1 ГБ",
         dropTitle: "Загрузите аудио или видео",
         dropSubtitle: "Запись встречи, интервью, звонка или другого материала",
@@ -538,6 +544,12 @@
         fileTooLarge: "Файл слишком большой: {size} МБ\nМаксимум: {max} МБ",
         size: "Размер",
         initialCheckFailed: "Не удалось выполнить проверку файла.",
+        detectingDuration: "Проверяем длительность записи...",
+        durationDetectionFailed: "Не удалось определить длительность записи. Попробуйте другой файл или формат.",
+        durationCheckFailed: "Не удалось проверить длительность записи и доступные минуты.",
+        fileTooLong: "Запись длиннее допустимых {max} минут.",
+        zeroBalance: "Минуты для обработки закончились. Пополните минуты или выберите тариф.",
+        insufficientMinutes: "Недостаточно минут. Нужно: {required}; доступно: {available}.",
         fileRejected: "Файл не прошёл проверку.",
         uploadFailed: "Ошибка загрузки файла.",
         networkUploadFailed: "Ошибка сети при загрузке файла.",
@@ -563,7 +575,7 @@
         valueTitle: "Después del procesamiento recibirás:",
         benefit1: "Resumen, decisiones e insights",
         benefit2: "Tareas, riesgos y responsables",
-        benefit3: "Informe web y diapositiva ejecutiva",
+        benefit3: "Informe web, diapositiva ejecutiva y transcripción",
         formatNote: "Compatible con la mayoría de formatos de audio y video · hasta 1 GB",
         dropTitle: "Sube audio o video",
         dropSubtitle: "Grabación de una reunión, entrevista, llamada u otro material",
@@ -583,6 +595,12 @@
         fileTooLarge: "El archivo es demasiado grande: {size} MB\nMáximo: {max} MB",
         size: "Tamaño",
         initialCheckFailed: "No se pudo comprobar el archivo.",
+        detectingDuration: "Comprobando la duración de la grabación...",
+        durationDetectionFailed: "No se pudo determinar la duración de la grabación. Prueba otro archivo o formato.",
+        durationCheckFailed: "No se pudo verificar la duración y los minutos disponibles.",
+        fileTooLong: "La grabación supera el máximo permitido de {max} minutos.",
+        zeroBalance: "No hay minutos de procesamiento disponibles. Añade minutos o elige un plan.",
+        insufficientMinutes: "No hay suficientes minutos. Necesarios: {required}; disponibles: {available}.",
         fileRejected: "El archivo no superó la validación.",
         uploadFailed: "Error al subir el archivo.",
         networkUploadFailed: "Error de red al subir el archivo.",
@@ -608,7 +626,7 @@
         valueTitle: "Após o processamento, você receberá:",
         benefit1: "Resumo, decisões e insights",
         benefit2: "Tarefas, riscos e responsáveis",
-        benefit3: "Relatório web e slide executivo",
+        benefit3: "Relatório web, slide executivo e transcrição",
         formatNote: "Compatível com a maioria dos formatos de áudio e vídeo · até 1 GB",
         dropTitle: "Envie áudio ou vídeo",
         dropSubtitle: "Gravação de reunião, entrevista, chamada ou outro material",
@@ -628,6 +646,12 @@
         fileTooLarge: "O arquivo é muito grande: {size} MB\nMáximo: {max} MB",
         size: "Tamanho",
         initialCheckFailed: "Não foi possível verificar o arquivo.",
+        detectingDuration: "Verificando a duração da gravação...",
+        durationDetectionFailed: "Não foi possível determinar a duração da gravação. Tente outro arquivo ou formato.",
+        durationCheckFailed: "Não foi possível verificar a duração e os minutos disponíveis.",
+        fileTooLong: "A gravação ultrapassa o máximo permitido de {max} minutos.",
+        zeroBalance: "Não há minutos de processamento disponíveis. Adicione minutos ou escolha um plano.",
+        insufficientMinutes: "Minutos insuficientes. Necessários: {required}; disponíveis: {available}.",
         fileRejected: "O arquivo não passou na validação.",
         uploadFailed: "Falha ao enviar o arquivo.",
         networkUploadFailed: "Erro de rede ao enviar o arquivo.",
@@ -931,6 +955,131 @@
       return result;
     }
 
+
+    function detectMediaDuration(file) {
+      return new Promise((resolve, reject) => {
+        const objectUrl = URL.createObjectURL(file);
+        const media = document.createElement("video");
+        let settled = false;
+
+        const cleanup = () => {
+          clearTimeout(timeoutId);
+          media.removeAttribute("src");
+          try { media.load(); } catch (_) {}
+          URL.revokeObjectURL(objectUrl);
+        };
+
+        const finish = (value) => {
+          if (settled) return;
+          settled = true;
+          cleanup();
+          resolve(value);
+        };
+
+        const fail = () => {
+          if (settled) return;
+          settled = true;
+          cleanup();
+          reject(new Error(t("durationDetectionFailed")));
+        };
+
+        const readDuration = () => {
+          const duration = Number(media.duration);
+          if (Number.isFinite(duration) && duration > 0) {
+            finish(duration);
+            return true;
+          }
+          return false;
+        };
+
+        media.preload = "metadata";
+        media.muted = true;
+        media.playsInline = true;
+
+        media.onloadedmetadata = () => {
+          if (readDuration()) return;
+
+          // Some media containers initially report Infinity. Seeking forces
+          // browsers that support the container to resolve the real duration.
+          if (media.duration === Infinity) {
+            try {
+              media.currentTime = Number.MAX_SAFE_INTEGER;
+            } catch (_) {
+              fail();
+            }
+          }
+        };
+
+        media.ondurationchange = () => {
+          readDuration();
+        };
+
+        media.ontimeupdate = () => {
+          if (readDuration()) return;
+          try { media.currentTime = 0; } catch (_) {}
+        };
+
+        media.onerror = fail;
+
+        const timeoutId = setTimeout(fail, 12000);
+        media.src = objectUrl;
+      });
+    }
+
+    async function preflightDurationCheck(durationSeconds) {
+      const response = await fetch(`${SUPABASE_URL}/functions/v1/preflight`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "apikey": SUPABASE_KEY,
+          "Authorization": `Bearer ${SUPABASE_KEY}`
+        },
+        body: JSON.stringify({
+          mode: "duration_check",
+          init_data: getInitData(),
+          duration_seconds: durationSeconds
+        })
+      });
+
+      const result = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        if (result.code === "DURATION_REQUIRED") {
+          throw new Error(t("durationDetectionFailed"));
+        }
+        throw new Error(result.ui?.title || result.message || t("durationCheckFailed"));
+      }
+
+      if (!result.allowed) {
+        const required = Number(result.duration?.required_minutes ?? 0);
+        const available = Number(
+          result.balance?.available_minutes ??
+          result.balance?.remaining_minutes ??
+          0
+        );
+
+        if (result.code === "FILE_TOO_LONG") {
+          const max = Number(result.limits?.max_duration_minutes ?? 90);
+          throw new Error(interpolate(t("fileTooLong"), { max }));
+        }
+
+        if (result.code === "ZERO_BALANCE") {
+          throw new Error(t("zeroBalance"));
+        }
+
+        if (result.code === "INSUFFICIENT_MINUTES") {
+          throw new Error(interpolate(t("insufficientMinutes"), {
+            required,
+            available
+          }));
+        }
+
+        throw new Error(result.ui?.title || result.message || t("durationCheckFailed"));
+      }
+
+      return result;
+    }
+
     async function uploadToSupabase(file) {
       const fileName = makeSafeFileName(file.name);
       const uploadUrl = `${SUPABASE_URL}/storage/v1/object/meetings/${fileName}`;
@@ -1010,6 +1159,11 @@
         await preflightInitialCheck(file);
 
         setLoading(true);
+        setStatus(t("detectingDuration"), false, "loading");
+
+        const durationSeconds = await detectMediaDuration(file);
+        await preflightDurationCheck(durationSeconds);
+
         setStatus(t("uploading"), false, "loading");
 
         const fileUrl = await uploadToSupabase(file);
