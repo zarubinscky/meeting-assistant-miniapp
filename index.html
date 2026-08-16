@@ -474,54 +474,6 @@
       tg.ready();
       tg.expand();
     }
-
-    // TEMP TEST — remove after miniapp_state auth test
-async function testMiniappStateAuth() {
-  try {
-    if (!tg) {
-      alert("TEST FAIL\nTelegram WebApp unavailable");
-      return;
-    }
-
-    if (!tg.initData) {
-      alert("TEST FAIL\ninitData is empty");
-      return;
-    }
-
-    const response = await fetch(
-      `${SUPABASE_URL}/functions/v1/preflight`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "apikey": SUPABASE_KEY,
-          "Authorization": `Bearer ${SUPABASE_KEY}`
-        },
-        body: JSON.stringify({
-          mode: "miniapp_state",
-          init_data: tg.initData
-        })
-      }
-    );
-
-    const result = await response.json();
-
-    alert(
-      `HTTP: ${response.status}\n` +
-      `OK: ${result.ok}\n` +
-      `Code: ${result.code || "-"}\n` +
-      `Plan: ${result.user?.plan || "-"}\n` +
-      `Language: ${result.user?.language || "-"}\n` +
-      `Available: ${result.balance?.available_minutes ?? "-"}`
-    );
-
-  } catch (error) {
-    alert(`TEST ERROR\n${error.message}`);
-  }
-}
-
-testMiniappStateAuth();
-// END TEMP TEST
     
     function setStatus(text, autoClear = false, type = "info") {
       const status = document.getElementById("status");
