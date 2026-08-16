@@ -1292,9 +1292,16 @@
       try {
 
         const state = await loadMiniAppState();
-        alert(
-  "MINIAPP STATE FULL\n\n" +
-  JSON.stringify(state, null, 2)
+       alert(
+  "COMMERCE STATE TEST\n\n" +
+  JSON.stringify({
+    plan: state.user?.plan,
+    subscription_active: state.user?.subscription_active,
+    available_minutes: state.balance?.available_minutes,
+    additional_minutes: state.balance?.additional_minutes,
+    additional_minutes_frozen: state.balance?.additional_minutes_frozen,
+    commerce: state.commerce
+  }, null, 2)
 );
         
       } catch (error) {
