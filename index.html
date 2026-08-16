@@ -1290,20 +1290,7 @@
       document.getElementById("sendButton").innerHTML = createReportButtonHtml();
 
       try {
-
-        const state = await loadMiniAppState();
-       alert(
-  "COMMERCE STATE TEST\n\n" +
-  JSON.stringify({
-    plan: state.user?.plan,
-    subscription_active: state.user?.subscription_active,
-    available_minutes: state.balance?.available_minutes,
-    additional_minutes: state.balance?.additional_minutes,
-    additional_minutes_frozen: state.balance?.additional_minutes_frozen,
-    commerce: state.commerce
-  }, null, 2)
-);
-        
+        await loadMiniAppState();
       } catch (error) {
         console.error("Mini App state init failed:", error);
         setStatus(
