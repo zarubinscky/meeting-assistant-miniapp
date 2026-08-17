@@ -151,6 +151,17 @@
       line-height: 1.45;
     }
 
+    /* Empty transient status must not reserve vertical space. */
+    #status:empty {
+      display: none;
+    }
+
+    /* Persistent account state sits close to the primary CTA. */
+    #accountStatus {
+      margin-top: 32px;
+      min-height: 0;
+    }
+
     .menu {
       margin-top: 12px;
       display: grid;
@@ -332,6 +343,11 @@
     .state-icon.warning { color:#d97706; }
     .state-icon.error { color:#dc2626; }
     .state-icon.loading { color:#6d4aff; }
+
+    /* Commercial/account notices use the same coral accent as the Create report rocket. */
+    #accountStatus .state-icon.info,
+    #accountStatus .state-icon.warning { color:#ff654d; }
+
     .spin { animation:mm-spin .9s linear infinite; }
     @keyframes mm-spin { to { transform:rotate(360deg); } }
 
