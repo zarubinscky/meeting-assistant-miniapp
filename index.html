@@ -423,6 +423,7 @@
      </div>
 
      <div id="status" class="status"></div>
+     <div id="accountStatus" class="status" hidden></div>
 
       <div class="menu">
         <button id="balanceBtn" class="menu-button" type="button"> <svg class="icon menu-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3v18h18"/><path d="M7 16v-4M12 16V8M17 16V5"/></svg><span id="balanceBtnText">Баланс</span>
@@ -841,6 +842,8 @@
 
     function renderPersistentAccountStatus(state = miniAppState) {
       const element = document.getElementById("accountStatus");
+      if (!element) return;
+
       const payload = getPersistentStatusPayload(state);
 
       if (!payload?.text) {
@@ -850,8 +853,9 @@
       }
 
       const icon = ICONS[payload.type] || ICONS.info;
+      const cleanText = String(payload.text).replace(/^[⚠️⛔\s]+/u, "");
       element.innerHTML =
-        `<span class="state-line">${icon}<span>${escapeStatusText(payload.text)}</span></span>`;
+        `<span class="state-line">${icon}<span>${escapeStatusText(cleanText)}</span></span>`;
       element.hidden = false;
     }
 
