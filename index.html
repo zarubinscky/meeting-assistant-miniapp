@@ -30,6 +30,43 @@
       visibility: hidden;
     }
 
+    /* Immediate language-neutral startup shell: avoids a blank Telegram WebView. */
+    .startup-loader {
+      display: none;
+      min-height: calc(100vh - 28px);
+      align-items: center;
+      justify-content: center;
+    }
+
+    html:not(.mm-ready) .startup-loader {
+      display: flex;
+    }
+
+    .startup-loader-mark {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 22px;
+      font-weight: 800;
+      color: #111827;
+    }
+
+    .startup-loader-icon {
+      width: 28px;
+      height: 28px;
+      color: #6d4aff;
+    }
+
+    .startup-loader-spinner {
+      width: 18px;
+      height: 18px;
+      margin-left: 2px;
+      border: 2px solid #e5e7eb;
+      border-top-color: #ff654d;
+      border-radius: 999px;
+      animation: mm-spin .8s linear infinite;
+    }
+
     .card {
       background: #ffffff;
       border-radius: 24px;
@@ -143,8 +180,8 @@
     }
 
     .status {
-      margin-top: 14px;
-      min-height: 22px;
+      margin-top: 7px;
+      min-height: 0;
       font-size: 14px;
       font-weight: 400;
       white-space: pre-line;
@@ -158,7 +195,7 @@
 
     /* Persistent account state sits close to the primary CTA. */
     #accountStatus {
-      margin-top: 32px;
+      margin-top: 7px;
       min-height: 0;
     }
 
@@ -391,6 +428,13 @@
 </head>
 
 <body>
+  <div class="startup-loader" aria-hidden="true">
+    <div class="startup-loader-mark">
+      <svg class="icon startup-loader-icon" viewBox="0 0 24 24"><path d="M9.5 4A2.5 2.5 0 0 0 7 6.5v.3A3 3 0 0 0 5 12a3 3 0 0 0 2 5.2v.3A2.5 2.5 0 0 0 9.5 20c.8 0 1.5-.4 2-1V5c-.5-.6-1.2-1-2-1Z"/><path d="M14.5 4A2.5 2.5 0 0 1 17 6.5v.3A3 3 0 0 1 19 12a3 3 0 0 1-2 5.2v.3a2.5 2.5 0 0 1-4.5 1.5V5c.5-.6 1.2-1 2-1Z"/></svg>
+      <span>MeetMind AI</span>
+      <span class="startup-loader-spinner"></span>
+    </div>
+  </div>
   <div class="app">
     <div class="card">
       <div class="brand">
@@ -483,6 +527,7 @@
     let isProcessing = false;
     let appLanguage = "en";
     let miniAppState = null;
+    let fileValidationBlocked = false;
 
     if (tg) {
       tg.ready();
@@ -520,7 +565,7 @@
         durationCheckFailed: "Unable to verify the recording duration and available minutes.",
         fileTooLong: "The recording is longer than the allowed {max} minutes.",
         zeroBalance: "No processing minutes are available. Add minutes or choose a plan.",
-        insufficientMinutes: "Not enough minutes. Required: {required}; available: {available}.",
+        insufficientMinutes: "Not enough minutes. File duration: {required} min; your balance: {available} min.",
         fileRejected: "The file did not pass validation.",
         uploadFailed: "File upload failed.",
         networkUploadFailed: "Network error while uploading the file.",
@@ -571,7 +616,7 @@
         durationCheckFailed: "Не удалось проверить длительность записи и доступные минуты.",
         fileTooLong: "Запись длиннее допустимых {max} минут.",
         zeroBalance: "Минуты для обработки закончились. Пополните минуты или выберите тариф.",
-        insufficientMinutes: "Недостаточно минут. Нужно: {required}; доступно: {available}.",
+        insufficientMinutes: "Недостаточно минут. Длительность файла: {required} мин., ваш баланс: {available} мин.",
         fileRejected: "Файл не прошёл проверку.",
         uploadFailed: "Ошибка загрузки файла.",
         networkUploadFailed: "Ошибка сети при загрузке файла.",
@@ -622,7 +667,7 @@
         durationCheckFailed: "No se pudo verificar la duración y los minutos disponibles.",
         fileTooLong: "La grabación supera el máximo permitido de {max} minutos.",
         zeroBalance: "No hay minutos de procesamiento disponibles. Añade minutos o elige un plan.",
-        insufficientMinutes: "No hay suficientes minutos. Necesarios: {required}; disponibles: {available}.",
+        insufficientMinutes: "No hay suficientes minutos. Duración del archivo: {required} min; tu saldo: {available} min.",
         fileRejected: "El archivo no superó la validación.",
         uploadFailed: "Error al subir el archivo.",
         networkUploadFailed: "Error de red al subir el archivo.",
@@ -673,7 +718,7 @@
         durationCheckFailed: "Não foi possível verificar a duração e os minutos disponíveis.",
         fileTooLong: "A gravação ultrapassa o máximo permitido de {max} minutos.",
         zeroBalance: "Não há minutos de processamento disponíveis. Adicione minutos ou escolha um plano.",
-        insufficientMinutes: "Minutos insuficientes. Necessários: {required}; disponíveis: {available}.",
+        insufficientMinutes: "Minutos insuficientes. Duração do arquivo: {required} min; seu saldo: {available} min.",
         fileRejected: "O arquivo não passou na validação.",
         uploadFailed: "Falha ao enviar o arquivo.",
         networkUploadFailed: "Erro de rede ao enviar o arquivo.",
@@ -856,6 +901,33 @@
       return null;
     }
 
+    function setPersistentStatusVisible(visible) {
+      const element = document.getElementById("accountStatus");
+      if (!element) return;
+      if (!visible) {
+        element.hidden = true;
+        return;
+      }
+      renderPersistentAccountStatus(miniAppState);
+    }
+
+    function isPersistentAccountBlocked(state = miniAppState) {
+      const payload = getPersistentStatusPayload(state);
+      if (!payload) return false;
+      return payload.type === "error";
+    }
+
+    function syncCreateButtonState() {
+      const button = document.getElementById("sendButton");
+      const hasFile = !!document.getElementById("fileInput").files[0];
+      button.disabled =
+        isProcessing ||
+        !hasFile ||
+        fileValidationBlocked ||
+        isPersistentAccountBlocked();
+      if (!isProcessing) button.innerHTML = createReportButtonHtml();
+    }
+
     function renderPersistentAccountStatus(state = miniAppState) {
       const element = document.getElementById("accountStatus");
       if (!element) return;
@@ -943,8 +1015,10 @@
       const fileInput = document.getElementById("fileInput");
       const button = document.getElementById("sendButton");
       fileInput.value = "";
+      fileValidationBlocked = false;
       setFileState(t("noFile"), false);
       setStatus("", false);
+      setPersistentStatusVisible(true);
       button.disabled = true;
       button.innerHTML = createReportButtonHtml();
     }
@@ -1022,11 +1096,11 @@
         return;
       }
 
+      fileValidationBlocked = false;
       setFileState(`${file.name}\n${t("size")}: ${formatFileSize(file.size)}`, true);
       setStatus("");
-      const button = document.getElementById("sendButton");
-      button.disabled = false;
-      button.innerHTML = createReportButtonHtml();
+      setPersistentStatusVisible(true);
+      syncCreateButtonState();
     }
 
     async function preflightInitialCheck(file) {
@@ -1166,14 +1240,22 @@
         }
 
         if (result.code === "ZERO_BALANCE") {
-          throw new Error(t("zeroBalance"));
+          const error = new Error(t("zeroBalance"));
+          error.code = result.code;
+          error.required = required;
+          error.available = available;
+          throw error;
         }
 
         if (result.code === "INSUFFICIENT_MINUTES") {
-          throw new Error(interpolate(t("insufficientMinutes"), {
+          const error = new Error(interpolate(t("insufficientMinutes"), {
             required,
             available
           }));
+          error.code = result.code;
+          error.required = required;
+          error.available = available;
+          throw error;
         }
 
         throw new Error(result.ui?.title || result.message || t("durationCheckFailed"));
@@ -1288,13 +1370,25 @@
         console.error(error);
         isProcessing = false;
         hideUploadProgress();
-        setLoading(false);
 
-        button.disabled = false;
-        button.innerHTML = createReportButtonHtml();
+        const blockingCodes = new Set([
+          "ZERO_BALANCE",
+          "INSUFFICIENT_MINUTES",
+          "FILE_TOO_LONG"
+        ]);
+        fileValidationBlocked = blockingCodes.has(error?.code);
 
         const message = error instanceof Error ? error.message : t("genericSendFailed");
         setStatus(message, false, "error");
+
+        if (fileValidationBlocked) {
+          // File-specific validation is more precise than the generic account notice.
+          setPersistentStatusVisible(false);
+        } else {
+          setPersistentStatusVisible(true);
+        }
+
+        syncCreateButtonState();
       }
     }
 
@@ -1399,7 +1493,7 @@
           "error"
         );
       } finally {
-        document.getElementById("sendButton").innerHTML = createReportButtonHtml();
+        syncCreateButtonState();
         document.documentElement.classList.add("mm-ready");
       }
     }
