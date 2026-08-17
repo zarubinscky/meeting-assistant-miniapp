@@ -25,6 +25,11 @@
       margin: 0 auto;
     }
 
+    /* Hide fallback-language UI until authenticated state resolves the language. */
+    html:not(.mm-ready) .app {
+      visibility: hidden;
+    }
+
     .card {
       background: #ffffff;
       border-radius: 24px;
@@ -141,7 +146,7 @@
       margin-top: 14px;
       min-height: 22px;
       font-size: 14px;
-      font-weight: 600;
+      font-weight: 400;
       white-space: pre-line;
       line-height: 1.45;
     }
@@ -770,7 +775,84 @@
 
       miniAppState = result;
       applyLanguage(result.user?.language);
+      renderPersistentAccountStatus(result);
       return result;
+    }
+
+    function escapeStatusText(text) {
+      return String(text || "")
+        .trim()
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/\n/g, "<br>");
+    }
+
+    function normalizeStatusType(value) {
+      const raw = String(value || "").toLowerCase();
+      if (["error", "danger", "blocked", "critical"].includes(raw)) return "error";
+      if (["warning", "warn", "low", "expired"].includes(raw)) return "warning";
+      if (["success", "ok"].includes(raw)) return "success";
+      return "info";
+    }
+
+    function getPersistentStatusPayload(state) {
+      if (!state) return null;
+
+      const candidates = [
+        state.status,
+        state.ui?.status,
+        state.account_status,
+        state.balance?.status,
+        state.commerce?.status
+      ];
+
+      for (const candidate of candidates) {
+        if (!candidate) continue;
+
+        if (typeof candidate === "string") {
+          return { text: candidate, type: "warning" };
+        }
+
+        if (typeof candidate === "object") {
+          const text =
+            candidate.text ??
+            candidate.message ??
+            candidate.title ??
+            candidate.label ??
+            candidate.body;
+
+          if (text) {
+            return {
+              text: String(text),
+              type: normalizeStatusType(
+                candidate.type ??
+                candidate.level ??
+                candidate.severity ??
+                candidate.kind
+              )
+            };
+          }
+        }
+      }
+
+      return null;
+    }
+
+    function renderPersistentAccountStatus(state = miniAppState) {
+      const element = document.getElementById("accountStatus");
+      const payload = getPersistentStatusPayload(state);
+
+      if (!payload?.text) {
+        element.hidden = true;
+        element.innerHTML = "";
+        return;
+      }
+
+      const icon = ICONS[payload.type] || ICONS.info;
+      element.innerHTML =
+        `<span class="state-line">${icon}<span>${escapeStatusText(payload.text)}</span></span>`;
+      element.hidden = false;
     }
 
     function setStatus(text, autoClear = false, type = "info") {
@@ -1284,20 +1366,21 @@
     });
 
     async function initializeMiniApp() {
-      // Security-first: English is the global fallback until authenticated
-      // Telegram initData returns the user's stored interface language.
-      applyLanguage("en");
-      document.getElementById("sendButton").innerHTML = createReportButtonHtml();
-
+      // Keep UI hidden until authenticated miniapp_state resolves the language.
+      // English remains the internal fallback if state loading fails.
       try {
         await loadMiniAppState();
       } catch (error) {
         console.error("Mini App state init failed:", error);
+        applyLanguage("en");
         setStatus(
           error instanceof Error ? error.message : t("stateFailed"),
           false,
           "error"
         );
+      } finally {
+        document.getElementById("sendButton").innerHTML = createReportButtonHtml();
+        document.documentElement.classList.add("mm-ready");
       }
     }
 
