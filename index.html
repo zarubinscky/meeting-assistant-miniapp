@@ -1429,24 +1429,37 @@
       handleFileSelected();
     });
 
+
     document.getElementById("balanceBtn").addEventListener("click", async () => {
-      setButtonLoading("balanceBtn", t("sendingShort"), true);
-      try {
-        const response = await fetch(BALANCE_WEBHOOK_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ telegram_id: getTelegramChatId() })
-        });
-        if (!response.ok) throw new Error(t("balanceFailed"));
-        setStatus(t("balanceSent"), true, "success");
-      } catch (error) {
-        setStatus(t("balanceFailed"), true, "error");
-        console.error(error);
-      } finally {
-        setButtonLoading("balanceBtn", "", false);
-      }
+  setButtonLoading("balanceBtn", t("sendingShort"), true);
+
+  try {
+    const response = await fetch(COMMERCE_WEBHOOK_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        telegram_id: getTelegramChatId(),
+        action: "balance"
+      })
     });
 
+    if (!response.ok) {
+      throw new Error(t("balanceFailed"));
+    }
+
+    setStatus(t("balanceSent"), true, "success");
+
+  } catch (error) {
+    setStatus(t("balanceFailed"), true, "error");
+    console.error(error);
+
+  } finally {
+    setButtonLoading("balanceBtn", "", false);
+  }
+});
+    
    document.getElementById("topupBtn").addEventListener("click", async () => {
   setButtonLoading("topupBtn", t("sendingShort"), true);
 
