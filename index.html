@@ -519,6 +519,7 @@
     const SUPABASE_KEY = "sb_publishable_IS_IDGRqz9igQxh3_T1OzQ_ZnRkolZU";
     const N8N_WEBHOOK_URL = "https://zarubinscky.app.n8n.cloud/webhook/113c46f6-165e-461e-8a6b-b37e1a0e735f";
     const BALANCE_WEBHOOK_URL = "https://zarubinscky.app.n8n.cloud/webhook/c6d90556-2d10-4efa-b221-2633b962f514";
+    const COMMERCE_WEBHOOK_URL = "https://zarubinscky.app.n8n.cloud/webhook/miniapp-commerce-v3";
     const BOT_USERNAME = "meetmind_app_bot";
     const MAX_FILE_SIZE_MB = 1024;
     const SUPPORTED_LANGUAGES = ["en", "ru", "es", "pt"];
@@ -1446,20 +1447,45 @@
       }
     });
 
-    document.getElementById("topupBtn").addEventListener("click", async () => {
-      setButtonLoading("topupBtn", t("sendingShort"), true);
-      try {
-        // The backend determines the commercial state and button label.
-        // Telegram/n8n remains responsible for the actual system message / Stars flow.
-        openBotStart("pricing");
-        setStatus(t("commerceSent"), true, "success");
-      } catch (error) {
-        setStatus(t("commerceFailed"), true, "error");
-        console.error(error);
-      } finally {
-        setButtonLoading("topupBtn", "", false);
-      }
+   document.getElementById("topupBtn").addEventListener("click", async () => {
+  setButtonLoading("topupBtn", t("sendingShort"), true);
+
+  try {
+    const buttonKey = miniAppState?.commerce?.button_key;
+
+    let action = "add_minutes";
+
+    if (buttonKey === "choose_plan") {
+      action = "choose_plan";
+    } else if (buttonKey === "renew_subscription") {
+      action = "renew_subscription";
+    }
+
+    const response = await fetch(COMMERCE_WEBHOOK_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        telegram_id: getTelegramChatId(),
+        action
+      })
     });
+
+    if (!response.ok) {
+      throw new Error(t("commerceFailed"));
+    }
+
+    setStatus(t("commerceSent"), true, "success");
+
+  } catch (error) {
+    setStatus(t("commerceFailed"), true, "error");
+    console.error(error);
+
+  } finally {
+    setButtonLoading("topupBtn", "", false);
+  }
+});
 
     document.getElementById("aboutBtn").addEventListener("click", () => {
       try {
