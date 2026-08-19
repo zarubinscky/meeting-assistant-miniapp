@@ -334,7 +334,7 @@
   
     .menu-button {
       display: grid;
-      grid-template-columns: 24px auto;
+      grid-template-columns: 24px minmax(0, 132px);
       align-items: center;
       justify-content: center;
       column-gap: 9px;
@@ -1438,10 +1438,11 @@
 
       const fileSizeMb = file.size / 1024 / 1024;
       if (fileSizeMb > MAX_FILE_SIZE_MB) {
+        fileValidationBlocked = true;
         setFileState(interpolate(t("fileTooLarge"), {
           size: fileSizeMb.toFixed(1),
           max: MAX_FILE_SIZE_MB
-        }));
+        }), true);
         document.getElementById("sendButton").disabled = true;
         return;
       }
