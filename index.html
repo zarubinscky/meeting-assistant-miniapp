@@ -1653,7 +1653,8 @@
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           chat_id: getTelegramChatId(),
-          file_url: fileUrl
+          file_url: fileUrl,
+          language: appLanguage
         })
       });
 
