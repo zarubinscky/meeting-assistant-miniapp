@@ -524,6 +524,7 @@
 
     const SUPABASE_URL = "https://vaddfiksldaebnzaccks.supabase.co";
     const SUPABASE_KEY = "sb_publishable_IS_IDGRqz9igQxh3_T1OzQ_ZnRkolZU";
+    const ANALYTICS_URL = `${SUPABASE_URL}/functions/v1/analytics`;
     const N8N_WEBHOOK_URL = "https://zarubinscky.app.n8n.cloud/webhook/113c46f6-165e-461e-8a6b-b37e1a0e735f";
     const BALANCE_WEBHOOK_URL = "https://zarubinscky.app.n8n.cloud/webhook/c6d90556-2d10-4efa-b221-2633b962f514";
     const COMMERCE_WEBHOOK_URL = "https://zarubinscky.app.n8n.cloud/webhook/miniapp-commerce-v3";
@@ -536,6 +537,11 @@
     let appLanguage = "en";
     let miniAppState = null;
     let fileValidationBlocked = false;
+
+    // Analytics is intentionally isolated from the critical product path.
+    // No analytics request is awaited by upload / preflight / processing logic.
+    let uploadSessionId = null;
+    let selectedFileAnalytics = null;
 
     if (tg) {
       tg.ready();
@@ -1079,6 +1085,82 @@
       );
     }
 
+    function createUploadSessionId() {
+      if (window.crypto?.randomUUID) return window.crypto.randomUUID();
+
+      // UUID v4 fallback for older WebViews.
+      return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, char => {
+        const random = Math.floor(Math.random() * 16);
+        const value = char === "x" ? random : (random & 0x3) | 0x8;
+        return value.toString(16);
+      });
+    }
+
+    function getAnalyticsCampaign() {
+      const startParam = tg?.initDataUnsafe?.start_param;
+      return startParam ? String(startParam).slice(0, 200) : null;
+    }
+
+    function getFileAnalytics(file) {
+      if (!file) return {};
+
+      const sizeBytes = Number(file.size || 0);
+      return {
+        file_size_bytes: sizeBytes,
+        file_size_mb: Number((sizeBytes / 1024 / 1024).toFixed(3)),
+        mime_type: file.type || "application/octet-stream",
+        file_extension: getExtension(file.name)
+      };
+    }
+
+    function analyticsErrorCode(error, fallback = "UNKNOWN_ERROR") {
+      return String(error?.code || fallback).slice(0, 100);
+    }
+
+    function analyticsErrorStage(error, fallback = "unknown") {
+      return String(error?.stage || fallback).slice(0, 100);
+    }
+
+    function trackAnalytics(eventName, properties = {}, options = {}) {
+      // Fire-and-forget: analytics must never block or fail the user flow.
+      try {
+        const initData = tg?.initData;
+        if (!initData) return;
+
+        const payload = {
+          init_data: initData,
+          event_name: eventName,
+          language: options.language || appLanguage || "en",
+          source: options.source || "miniapp",
+          campaign: options.campaign ?? getAnalyticsCampaign(),
+          meeting_id: options.meeting_id ?? null,
+          upload_session_id:
+            options.upload_session_id !== undefined
+              ? options.upload_session_id
+              : uploadSessionId,
+          properties: {
+            client_timestamp: new Date().toISOString(),
+            ...properties
+          }
+        };
+
+        fetch(ANALYTICS_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "apikey": SUPABASE_KEY,
+            "Authorization": `Bearer ${SUPABASE_KEY}`
+          },
+          body: JSON.stringify(payload),
+          keepalive: true
+        }).catch(error => {
+          console.warn("Analytics delivery failed:", eventName, error);
+        });
+      } catch (error) {
+        console.warn("Analytics tracking failed:", eventName, error);
+      }
+    }
+
     function getInitData() {
       const initData = tg?.initData;
       if (!initData) throw new Error(t("openViaTelegram"));
@@ -1144,30 +1226,55 @@
     }
 
     async function loadMiniAppState() {
-      const response = await fetch(`${SUPABASE_URL}/functions/v1/preflight`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "apikey": SUPABASE_KEY,
-          "Authorization": `Bearer ${SUPABASE_KEY}`
-        },
-        body: JSON.stringify({
-          mode: "miniapp_state",
-          init_data: getInitData()
-        })
-      });
+      const startedAt = performance.now();
 
-      const result = await response.json().catch(() => ({}));
-      if (!response.ok || !result.ok) {
-        const error = new Error(result.message || t("stateFailed"));
-        error.code = result.code;
+      try {
+        const response = await fetch(`${SUPABASE_URL}/functions/v1/preflight`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "apikey": SUPABASE_KEY,
+            "Authorization": `Bearer ${SUPABASE_KEY}`
+          },
+          body: JSON.stringify({
+            mode: "miniapp_state",
+            init_data: getInitData()
+          })
+        });
+
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok || !result.ok) {
+          const error = new Error(result.message || t("stateFailed"));
+          error.code = result.code || `HTTP_${response.status}`;
+          error.stage = "miniapp_state";
+          throw error;
+        }
+
+        miniAppState = result;
+        applyLanguage(result.user?.language);
+        renderPersistentAccountStatus(result);
+
+        trackAnalytics("miniapp_state_loaded", {
+          load_duration_ms: Math.round(performance.now() - startedAt),
+          plan: result.user?.plan ?? null,
+          available_minutes: Number(
+            result.balance?.available_minutes ??
+            result.balance?.remaining_minutes ??
+            result.balance?.free_minutes ??
+            0
+          ),
+          commerce_button_key: result.commerce?.button_key ?? null
+        });
+
+        return result;
+      } catch (error) {
+        trackAnalytics("miniapp_state_failed", {
+          load_duration_ms: Math.round(performance.now() - startedAt),
+          error_code: analyticsErrorCode(error, "MINIAPP_STATE_FAILED"),
+          error_stage: analyticsErrorStage(error, "miniapp_state")
+        });
         throw error;
       }
-
-      miniAppState = result;
-      applyLanguage(result.user?.language);
-      renderPersistentAccountStatus(result);
-      return result;
     }
 
     function escapeStatusText(text) {
@@ -1364,8 +1471,17 @@
     function clearSelectedFile() {
       const fileInput = document.getElementById("fileInput");
       const button = document.getElementById("sendButton");
+
+      if (fileInput.files[0]) {
+        trackAnalytics("file_removed", {
+          ...(selectedFileAnalytics || getFileAnalytics(fileInput.files[0]))
+        });
+      }
+
       fileInput.value = "";
       fileValidationBlocked = false;
+      selectedFileAnalytics = null;
+      uploadSessionId = null;
       setFileState(t("noFile"), false);
       setStatus("", false);
       setPersistentStatusVisible(true);
@@ -1436,9 +1552,23 @@
         return;
       }
 
+      uploadSessionId = createUploadSessionId();
+      selectedFileAnalytics = getFileAnalytics(file);
+
+      trackAnalytics("file_selected", {
+        ...selectedFileAnalytics
+      });
+
       const fileSizeMb = file.size / 1024 / 1024;
       if (fileSizeMb > MAX_FILE_SIZE_MB) {
         fileValidationBlocked = true;
+
+        trackAnalytics("file_rejected_size", {
+          ...selectedFileAnalytics,
+          max_file_size_mb: MAX_FILE_SIZE_MB,
+          error_code: "FILE_TOO_LARGE_CLIENT"
+        });
+
         setFileState(interpolate(t("fileTooLarge"), {
           size: fileSizeMb.toFixed(1),
           max: MAX_FILE_SIZE_MB
@@ -1455,31 +1585,60 @@
     }
 
     async function preflightInitialCheck(file) {
-      const response = await fetch(`${SUPABASE_URL}/functions/v1/preflight`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "apikey": SUPABASE_KEY,
-          "Authorization": `Bearer ${SUPABASE_KEY}`
-        },
-        body: JSON.stringify({
-          mode: "initial_check",
-          init_data: getInitData(),
-          file_name: file.name,
-          file_size_bytes: file.size,
-          mime_type: file.type
-        })
+      const startedAt = performance.now();
+
+      trackAnalytics("preflight_initial_started", {
+        ...(selectedFileAnalytics || getFileAnalytics(file))
       });
 
-      const result = await response.json().catch(() => ({}));
+      try {
+        const response = await fetch(`${SUPABASE_URL}/functions/v1/preflight`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "apikey": SUPABASE_KEY,
+            "Authorization": `Bearer ${SUPABASE_KEY}`
+          },
+          body: JSON.stringify({
+            mode: "initial_check",
+            init_data: getInitData(),
+            file_name: file.name,
+            file_size_bytes: file.size,
+            mime_type: file.type
+          })
+        });
 
-      if (!response.ok) {
-        throw new Error(result.message || t("initialCheckFailed"));
+        const result = await response.json().catch(() => ({}));
+
+        if (!response.ok) {
+          const error = new Error(result.message || t("initialCheckFailed"));
+          error.code = result.code || `HTTP_${response.status}`;
+          error.stage = "preflight_initial";
+          throw error;
+        }
+
+        if (!result.allowed) {
+          const error = new Error(result.message || t("fileRejected"));
+          error.code = result.code || "FILE_REJECTED";
+          error.stage = "preflight_initial";
+          throw error;
+        }
+
+        trackAnalytics("preflight_initial_passed", {
+          duration_ms: Math.round(performance.now() - startedAt),
+          ...(selectedFileAnalytics || getFileAnalytics(file))
+        });
+
+        return result;
+      } catch (error) {
+        trackAnalytics("preflight_initial_failed", {
+          duration_ms: Math.round(performance.now() - startedAt),
+          error_code: analyticsErrorCode(error, "PREFLIGHT_INITIAL_FAILED"),
+          error_stage: analyticsErrorStage(error, "preflight_initial"),
+          ...(selectedFileAnalytics || getFileAnalytics(file))
+        });
+        throw error;
       }
-      if (!result.allowed) {
-        throw new Error(result.message || t("fileRejected"));
-      }
-      return result;
     }
 
 
@@ -1554,30 +1713,40 @@
     }
 
     async function preflightDurationCheck(durationSeconds) {
-      const response = await fetch(`${SUPABASE_URL}/functions/v1/preflight`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "apikey": SUPABASE_KEY,
-          "Authorization": `Bearer ${SUPABASE_KEY}`
-        },
-        body: JSON.stringify({
-          mode: "duration_check",
-          init_data: getInitData(),
-          duration_seconds: durationSeconds
-        })
+      const startedAt = performance.now();
+
+      trackAnalytics("preflight_duration_started", {
+        duration_seconds: Number(durationSeconds.toFixed(3))
       });
 
-      const result = await response.json().catch(() => ({}));
+      try {
+        const response = await fetch(`${SUPABASE_URL}/functions/v1/preflight`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "apikey": SUPABASE_KEY,
+            "Authorization": `Bearer ${SUPABASE_KEY}`
+          },
+          body: JSON.stringify({
+            mode: "duration_check",
+            init_data: getInitData(),
+            duration_seconds: durationSeconds
+          })
+        });
 
-      if (!response.ok) {
-        if (result.code === "DURATION_REQUIRED") {
-          throw new Error(t("durationDetectionFailed"));
+        const result = await response.json().catch(() => ({}));
+
+        if (!response.ok) {
+          const error = new Error(
+            result.code === "DURATION_REQUIRED"
+              ? t("durationDetectionFailed")
+              : (result.ui?.title || result.message || t("durationCheckFailed"))
+          );
+          error.code = result.code || `HTTP_${response.status}`;
+          error.stage = "preflight_duration";
+          throw error;
         }
-        throw new Error(result.ui?.title || result.message || t("durationCheckFailed"));
-      }
 
-      if (!result.allowed) {
         const required = Number(result.duration?.required_minutes ?? 0);
         const available = Number(
           result.balance?.available_minutes ??
@@ -1585,39 +1754,77 @@
           0
         );
 
-        if (result.code === "FILE_TOO_LONG") {
-          const max = Number(result.limits?.max_duration_minutes ?? 90);
-          throw new Error(interpolate(t("fileTooLong"), { max }));
-        }
+        if (!result.allowed) {
+          if (result.code === "FILE_TOO_LONG") {
+            const max = Number(result.limits?.max_duration_minutes ?? 90);
+            const error = new Error(interpolate(t("fileTooLong"), { max }));
+            error.code = result.code;
+            error.stage = "preflight_duration";
+            error.required = required;
+            error.available = available;
+            error.max = max;
+            throw error;
+          }
 
-        if (result.code === "ZERO_BALANCE") {
-          const error = new Error(t("zeroBalance"));
-          error.code = result.code;
+          if (result.code === "ZERO_BALANCE") {
+            const error = new Error(t("zeroBalance"));
+            error.code = result.code;
+            error.stage = "preflight_duration";
+            error.required = required;
+            error.available = available;
+            throw error;
+          }
+
+          if (result.code === "INSUFFICIENT_MINUTES") {
+            const error = new Error(interpolate(t("insufficientMinutes"), {
+              required,
+              available
+            }));
+            error.code = result.code;
+            error.stage = "preflight_duration";
+            error.required = required;
+            error.available = available;
+            throw error;
+          }
+
+          const error = new Error(result.ui?.title || result.message || t("durationCheckFailed"));
+          error.code = result.code || "DURATION_CHECK_REJECTED";
+          error.stage = "preflight_duration";
           error.required = required;
           error.available = available;
           throw error;
         }
 
-        if (result.code === "INSUFFICIENT_MINUTES") {
-          const error = new Error(interpolate(t("insufficientMinutes"), {
-            required,
-            available
-          }));
-          error.code = result.code;
-          error.required = required;
-          error.available = available;
-          throw error;
-        }
+        trackAnalytics("preflight_duration_passed", {
+          duration_ms: Math.round(performance.now() - startedAt),
+          duration_seconds: Number(durationSeconds.toFixed(3)),
+          required_minutes: required,
+          available_minutes: available
+        });
 
-        throw new Error(result.ui?.title || result.message || t("durationCheckFailed"));
+        return result;
+      } catch (error) {
+        trackAnalytics("preflight_duration_failed", {
+          duration_ms: Math.round(performance.now() - startedAt),
+          duration_seconds: Number(durationSeconds.toFixed(3)),
+          error_code: analyticsErrorCode(error, "PREFLIGHT_DURATION_FAILED"),
+          error_stage: analyticsErrorStage(error, "preflight_duration"),
+          required_minutes: Number(error?.required ?? 0),
+          available_minutes: Number(error?.available ?? 0),
+          max_duration_minutes: Number(error?.max ?? 0)
+        });
+        throw error;
       }
-
-      return result;
     }
 
     async function uploadToSupabase(file) {
       const fileName = makeSafeFileName(file.name);
       const uploadUrl = `${SUPABASE_URL}/storage/v1/object/meetings/${fileName}`;
+      const startedAt = performance.now();
+
+      trackAnalytics("upload_started", {
+        ...(selectedFileAnalytics || getFileAnalytics(file))
+      });
 
       showUploadProgress(file.size);
 
@@ -1635,33 +1842,121 @@
         xhr.onload = () => {
           if (xhr.status >= 200 && xhr.status < 300) {
             updateUploadProgress(file.size, file.size);
+
+            trackAnalytics("upload_completed", {
+              duration_ms: Math.round(performance.now() - startedAt),
+              http_status: xhr.status,
+              bytes_uploaded: file.size,
+              ...(selectedFileAnalytics || getFileAnalytics(file))
+            });
+
             resolve(`${SUPABASE_URL}/storage/v1/object/public/meetings/${fileName}`);
           } else {
             console.error(xhr.responseText);
-            reject(new Error(t("uploadFailed")));
+
+            const error = new Error(t("uploadFailed"));
+            error.code = `HTTP_${xhr.status || 0}`;
+            error.stage = "upload";
+
+            trackAnalytics("upload_failed", {
+              duration_ms: Math.round(performance.now() - startedAt),
+              http_status: xhr.status || 0,
+              error_code: error.code,
+              error_stage: error.stage,
+              ...(selectedFileAnalytics || getFileAnalytics(file))
+            });
+
+            reject(error);
           }
         };
 
-        xhr.onerror = () => reject(new Error(t("networkUploadFailed")));
+        xhr.onerror = () => {
+          const error = new Error(t("networkUploadFailed"));
+          error.code = "UPLOAD_NETWORK_ERROR";
+          error.stage = "upload";
+
+          trackAnalytics("upload_failed", {
+            duration_ms: Math.round(performance.now() - startedAt),
+            error_code: error.code,
+            error_stage: error.stage,
+            ...(selectedFileAnalytics || getFileAnalytics(file))
+          });
+
+          reject(error);
+        };
+
         xhr.send(file);
       });
     }
 
-    async function startProcessing(fileUrl) {
-      const webhookResponse = await fetch(N8N_WEBHOOK_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          chat_id: getTelegramChatId(),
-          file_url: fileUrl,
-          language: appLanguage
-        })
+    async function startProcessing(fileUrl, file, durationSeconds, durationCheckResult) {
+      const startedAt = performance.now();
+
+      const requiredMinutes = Number(
+        durationCheckResult?.duration?.required_minutes ?? Math.ceil(durationSeconds / 60)
+      );
+      const availableMinutes = Number(
+        durationCheckResult?.balance?.available_minutes ??
+        durationCheckResult?.balance?.remaining_minutes ??
+        0
+      );
+
+      trackAnalytics("processing_start_requested", {
+        duration_seconds: Number(durationSeconds.toFixed(3)),
+        required_minutes: requiredMinutes,
+        available_minutes: availableMinutes,
+        ...(selectedFileAnalytics || getFileAnalytics(file))
       });
 
-      if (!webhookResponse.ok) {
-        const errorText = await webhookResponse.text();
-        console.error("n8n webhook error:", errorText);
-        throw new Error(t("processingStartFailed"));
+      try {
+        const webhookResponse = await fetch(N8N_WEBHOOK_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            chat_id: getTelegramChatId(),
+            file_url: fileUrl,
+            language: appLanguage,
+
+            // Cross-system correlation / technical analytics.
+            upload_session_id: uploadSessionId,
+            source_file_size_bytes: file.size,
+            source_file_size_mb: Number((file.size / 1024 / 1024).toFixed(3)),
+            source_mime_type: file.type || "application/octet-stream",
+            source_file_extension: getExtension(file.name),
+            duration_seconds: Number(durationSeconds.toFixed(3)),
+            required_minutes: requiredMinutes,
+            available_minutes: availableMinutes
+          })
+        });
+
+        if (!webhookResponse.ok) {
+          const errorText = await webhookResponse.text();
+          console.error("n8n webhook error:", errorText);
+
+          const error = new Error(t("processingStartFailed"));
+          error.code = `HTTP_${webhookResponse.status}`;
+          error.stage = "processing_start";
+          throw error;
+        }
+
+        trackAnalytics("processing_start_succeeded", {
+          duration_ms: Math.round(performance.now() - startedAt),
+          duration_seconds: Number(durationSeconds.toFixed(3)),
+          required_minutes: requiredMinutes,
+          available_minutes: availableMinutes,
+          ...(selectedFileAnalytics || getFileAnalytics(file))
+        });
+      } catch (error) {
+        trackAnalytics("processing_start_failed", {
+          duration_ms: Math.round(performance.now() - startedAt),
+          error_code: analyticsErrorCode(error, "PROCESSING_START_FAILED"),
+          error_stage: analyticsErrorStage(error, "processing_start"),
+          duration_seconds: Number(durationSeconds.toFixed(3)),
+          required_minutes: requiredMinutes,
+          available_minutes: availableMinutes,
+          ...(selectedFileAnalytics || getFileAnalytics(file))
+        });
+        throw error;
       }
     }
 
@@ -1678,8 +1973,17 @@
         return;
       }
 
+      if (!uploadSessionId) uploadSessionId = createUploadSessionId();
+      if (!selectedFileAnalytics) selectedFileAnalytics = getFileAnalytics(file);
+
       const fileSizeMb = file.size / 1024 / 1024;
       if (fileSizeMb > MAX_FILE_SIZE_MB) {
+        trackAnalytics("file_rejected_size", {
+          ...selectedFileAnalytics,
+          max_file_size_mb: MAX_FILE_SIZE_MB,
+          error_code: "FILE_TOO_LARGE_CLIENT"
+        });
+
         setFileState(interpolate(t("fileTooLarge"), {
           size: fileSizeMb.toFixed(1),
           max: MAX_FILE_SIZE_MB
@@ -1697,8 +2001,38 @@
         setLoading(true);
         setStatus(t("detectingDuration"), false, "loading");
 
-        const durationSeconds = await detectMediaDuration(file);
-        await preflightDurationCheck(durationSeconds);
+        const durationStartedAt = performance.now();
+
+        trackAnalytics("duration_detection_started", {
+          ...selectedFileAnalytics
+        });
+
+        let durationSeconds;
+
+        try {
+          durationSeconds = await detectMediaDuration(file);
+
+          trackAnalytics("duration_detected", {
+            detection_duration_ms: Math.round(performance.now() - durationStartedAt),
+            duration_seconds: Number(durationSeconds.toFixed(3)),
+            charged_minutes_client_estimate: Math.ceil(durationSeconds / 60),
+            ...selectedFileAnalytics
+          });
+        } catch (error) {
+          error.code = error.code || "DURATION_DETECTION_FAILED";
+          error.stage = error.stage || "duration_detection";
+
+          trackAnalytics("duration_detection_failed", {
+            detection_duration_ms: Math.round(performance.now() - durationStartedAt),
+            error_code: analyticsErrorCode(error, "DURATION_DETECTION_FAILED"),
+            error_stage: analyticsErrorStage(error, "duration_detection"),
+            ...selectedFileAnalytics
+          });
+
+          throw error;
+        }
+
+        const durationCheckResult = await preflightDurationCheck(durationSeconds);
 
         setStatus(t("uploading"), false, "loading");
 
@@ -1710,7 +2044,7 @@
         hideUploadProgress();
         setStatus(t("uploadedStarting"), false, "loading");
 
-        await startProcessing(fileUrl);
+        await startProcessing(fileUrl, file, durationSeconds, durationCheckResult);
 
         setStatus(t("reportSent"), true, "success");
         fileInput.value = "";
@@ -1729,6 +2063,14 @@
           "FILE_TOO_LONG"
         ]);
         fileValidationBlocked = blockingCodes.has(error?.code);
+
+        trackAnalytics("submission_failed", {
+          error_code: analyticsErrorCode(error, "SUBMISSION_FAILED"),
+          error_stage: analyticsErrorStage(error, "submission"),
+          required_minutes: Number(error?.required ?? 0),
+          available_minutes: Number(error?.available ?? 0),
+          ...(selectedFileAnalytics || getFileAnalytics(file))
+        });
 
         const message = error instanceof Error ? error.message : t("genericSendFailed");
         setStatus(message, false, "error");
@@ -1782,6 +2124,9 @@
 
 
     document.getElementById("balanceBtn").addEventListener("click", async () => {
+  trackAnalytics("balance_clicked", {
+    plan: miniAppState?.user?.plan ?? null
+  });
   setButtonLoading("balanceBtn", t("sendingShort"), true);
 
   try {
@@ -1801,9 +2146,15 @@
     }
 
     setStatus(t("balanceSent"), true, "success");
+    trackAnalytics("balance_open_succeeded", {
+      plan: miniAppState?.user?.plan ?? null
+    });
 
   } catch (error) {
     setStatus(t("balanceFailed"), true, "error");
+    trackAnalytics("balance_open_failed", {
+      error_code: analyticsErrorCode(error, "BALANCE_OPEN_FAILED")
+    });
     console.error(error);
 
   } finally {
@@ -1812,18 +2163,24 @@
 });
     
    document.getElementById("topupBtn").addEventListener("click", async () => {
+  const buttonKey = miniAppState?.commerce?.button_key;
+
+  let action = "add_minutes";
+  if (buttonKey === "choose_plan") {
+    action = "choose_plan";
+  } else if (buttonKey === "renew_subscription") {
+    action = "renew_subscription";
+  }
+
+  trackAnalytics("commerce_clicked", {
+    action,
+    button_key: buttonKey ?? null,
+    plan: miniAppState?.user?.plan ?? null
+  });
+
   setButtonLoading("topupBtn", t("sendingShort"), true);
 
   try {
-    const buttonKey = miniAppState?.commerce?.button_key;
-
-    let action = "add_minutes";
-
-    if (buttonKey === "choose_plan") {
-      action = "choose_plan";
-    } else if (buttonKey === "renew_subscription") {
-      action = "renew_subscription";
-    }
 
     const response = await fetch(COMMERCE_WEBHOOK_URL, {
       method: "POST",
@@ -1841,9 +2198,18 @@
     }
 
     setStatus(t("commerceSent"), true, "success");
+    trackAnalytics("commerce_open_succeeded", {
+      action,
+      button_key: buttonKey ?? null
+    });
 
   } catch (error) {
     setStatus(t("commerceFailed"), true, "error");
+    trackAnalytics("commerce_open_failed", {
+      action,
+      button_key: buttonKey ?? null,
+      error_code: analyticsErrorCode(error, "COMMERCE_OPEN_FAILED")
+    });
     console.error(error);
 
   } finally {
@@ -1852,24 +2218,42 @@
 });
 
     document.getElementById("aboutBtn").addEventListener("click", () => {
+      trackAnalytics("about_clicked");
+
       try {
         openBotStart("about");
         setStatus(t("aboutSent"), true, "success");
+        trackAnalytics("about_open_succeeded");
       } catch (error) {
+        trackAnalytics("about_open_failed", {
+          error_code: analyticsErrorCode(error, "ABOUT_OPEN_FAILED")
+        });
         console.error(error);
       }
     });
 
     document.getElementById("supportBtn").addEventListener("click", () => {
+      trackAnalytics("support_clicked");
+
       try {
         openBotStart("help");
         setStatus(t("supportSent"), true, "success");
+        trackAnalytics("support_open_succeeded");
       } catch (error) {
+        trackAnalytics("support_open_failed", {
+          error_code: analyticsErrorCode(error, "SUPPORT_OPEN_FAILED")
+        });
         console.error(error);
       }
     });
 
     async function initializeMiniApp() {
+      trackAnalytics("miniapp_opened", {
+        telegram_version: tg?.version ?? null,
+        platform: tg?.platform ?? null,
+        color_scheme: tg?.colorScheme ?? null
+      });
+
       // Keep UI hidden until authenticated miniapp_state resolves the language.
       // English remains the internal fallback if state loading fails.
       try {
